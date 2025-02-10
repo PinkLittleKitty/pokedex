@@ -126,6 +126,8 @@ const genRanges = {
 };
 let currentGen = 1;
 
+const pokemonData = [];
+
 async function fetchPokemonByGen(gen) {
     try {
         if (isLoading) return;
@@ -143,7 +145,9 @@ async function fetchPokemonByGen(gen) {
             );
         }
         
-        const pokemonData = await Promise.all(promises);
+        const fetchedPokemonData = await Promise.all(promises);
+        pokemonData.length = 0; // Clear previous gen data
+        pokemonData.push(...fetchedPokemonData);
         pokemonData.forEach(data => createPokemonCard(data));
         
     } catch (error) {
@@ -211,3 +215,128 @@ function hideLoading() {
     indicator.style.display = 'none';
     isLoading = false;
 }
+
+let gameScore = 0;
+let highScore = getCookie('highScore') || 0;
+
+const allPokemonData = [];
+
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? Number(match[2]) : 0;
+}
+
+function setHighScore(score) {
+    if (score > highScore) {
+        highScore = score;
+        document.cookie = `highScore=${score};max-age=31536000;path=/`;
+        updateScore();
+    }
+}
+
+async function fetchAllPokemon() {
+  try {
+      if (isLoading) return;
+      isLoading = true;
+      showLoading();
+        
+      const promises = [];
+      for (let i = 1; i <= 1010; i++) {
+          promises.push(
+              fetch(`https://pokeapi.co/api/v2/pokemon/${i}`)
+                  .then(response => response.json())
+          );
+      }
+        
+      const fetchedPokemonData = await Promise.all(promises);
+      allPokemonData.push(...fetchedPokemonData);
+        
+  } catch (error) {
+      console.error('Error fetching Pokemon:', error);
+  } finally {
+      hideLoading();
+      isLoading = false;
+  }
+}
+
+async function startWhosThatPokemon() {
+    if (allPokemonData.length === 0) {
+        await fetchAllPokemon();
+    }
+    gameScore = 0;
+    updateScore();
+    showNextPokemon();
+}
+
+function showNextPokemon() {
+  const gameModal = document.getElementById('gameModal');
+  const mysteryPokemon = document.getElementById('mysteryPokemon');
+  const answerOptions = document.getElementById('answerOptions');
+  const gameResult = document.getElementById('gameResult');
+    
+  gameResult.innerHTML = '';
+  mysteryPokemon.classList.add('silhouette');
+    
+  const correctPokemon = allPokemonData[Math.floor(Math.random() * allPokemonData.length)];
+  const options = [correctPokemon.name];
+    
+  while(options.length < 4) {
+      const randomPokemon = allPokemonData[Math.floor(Math.random() * allPokemonData.length)].name;
+      if(!options.includes(randomPokemon)) {
+          options.push(randomPokemon);
+      }
+  }
+    
+  const shuffledOptions = options.sort(() => Math.random() - 0.5);
+    
+  mysteryPokemon.src = correctPokemon.sprites.other['official-artwork'].front_default;
+    
+  answerOptions.innerHTML = shuffledOptions.map(option => `
+      <button class="answer-btn" onclick="checkAnswer('${option}', '${correctPokemon.name}')">
+          ${option}
+      </button>
+  `).join('');
+    
+  gameModal.style.display = 'block';
+}
+
+function updateScore() {
+    document.getElementById('gameScore').innerHTML = `
+        Puntuación: ${gameScore}<br>
+        Mejor Puntuación: ${highScore}
+    `;
+}
+
+  function checkAnswer(selected, correct) {
+      const gameResult = document.getElementById('gameResult');
+      const mysteryPokemon = document.getElementById('mysteryPokemon');
+      const answerButtons = document.querySelectorAll('.answer-btn');
+    
+      mysteryPokemon.classList.remove('silhouette');
+      answerButtons.forEach(btn => btn.disabled = true);
+    
+      if(selected === correct) {
+          gameScore += 100;
+          setHighScore(gameScore);
+          gameResult.innerHTML = `
+              <div class="result-popup correct">
+                  <h2>CORRECTO!</h2>
+                  <p>Es ${correct}!</p>
+              </div>`;
+      } else {
+          gameScore = 0;
+          gameResult.innerHTML = `
+              <div class="result-popup wrong">
+                  <h2>INCORRECTO!</h2>
+                  <p>Es ${correct}!</p>
+                  <p>¡Se reinició la puntuación!</p>
+              </div>`;
+      }
+    
+      updateScore();
+    
+      setTimeout(() => {
+          showNextPokemon();
+      }, 2000);
+  }
+  document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);

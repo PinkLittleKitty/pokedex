@@ -24,9 +24,9 @@
                 <button class="gen-btn" data-gen="7">Gen 7</button>
                 <button class="gen-btn" data-gen="8">Gen 8</button>
                 <button class="gen-btn" data-gen="9">Gen 9</button>
+                <button class="game-btn" id="whosThatPokemon">¿Quién es ese Pokémon?</button>
             </div>
         </header>
-        
         <main class="pokemon-grid">
             <div class="screen-reflection"></div>
             <!-- Pokemon cards will be dynamically inserted here -->
@@ -52,6 +52,17 @@
                 <span class="close">×</span>
             </div>
         </div>
+          <div id="gameModal" class="modal game-modal">
+              <div class="modal-content game-content">
+                  <span class="close" onclick="document.getElementById('gameModal').style.display='none'">×</span>
+                  <div class="game-screen">
+                      <img id="mysteryPokemon" class="pokemon-sprite silhouette" src="" alt="Who's that Pokemon?">
+                      <div id="answerOptions" class="answer-options"></div>
+                      <div id="gameScore" class="game-score">Puntuación: 0</div>
+                  </div>
+                  <div id="gameResult" class="game-result"></div>
+              </div>
+          </div>
     </div>
     <div class="loading-indicator">Cargando...</div>
     <script src="app.js"></script>

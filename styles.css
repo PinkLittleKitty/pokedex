@@ -491,3 +491,109 @@ h1 {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
 }
+  .game-btn {
+      background: var(--glow-blue);
+      color: var(--pokedex-dark);
+      border: 2px solid rgba(255,255,255,0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      margin-left: auto;
+  }
+
+  .game-btn:hover {
+      background: #a7d4f1;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+.game-screen {
+    background: #9ba5b8;
+    border: 12px solid var(--pokedex-dark);
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.silhouette {
+    filter: brightness(0);
+}
+
+.answer-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.answer-btn {
+    background: var(--pokedex-dark);
+    color: var(--text-light);
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.answer-btn:hover {
+    background: var(--pokedex-red);
+    transform: translateY(-2px);
+}
+  .game-score {
+      position: static;
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--text-light);
+  }
+.answer-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.game-result {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.result-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    animation: popIn 0.3s ease-out;
+    z-index: 100;
+}
+
+.result-popup.correct {
+    background: rgba(120, 200, 80, 0.9);
+    box-shadow: 0 0 20px rgba(120, 200, 80, 0.5);
+}
+
+.result-popup.wrong {
+    background: rgba(240, 128, 48, 0.9);
+    box-shadow: 0 0 20px rgba(240, 128, 48, 0.5);
+}
+
+@keyframes popIn {
+    from {
+        transform: translate(-50%, -50%) scale(0);
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.game-modal .close {
+    color: white;
+    font-size: 2.5rem;
+    z-index: 101;
+}
