@@ -56,50 +56,57 @@ function createPokemonCard(pokemon) {
     card.addEventListener('click', () => showPokemonDetails(pokemon));
     pokemonGrid.appendChild(card);
 }
+  function showPokemonDetails(pokemon) {
+      const pokemonDetails = document.getElementById('pokemon-details');
+      const types = pokemon.types.map(type => 
+          `<span class="type-badge" style="background-color: ${typeColors[type.type.name]}">${type.type.name}</span>`
+      ).join('');
 
-function showPokemonDetails(pokemon) {
-    const pokemonDetails = document.getElementById('pokemon-details');
-    const types = pokemon.types.map(type => 
-        `<span class="type-badge" style="background-color: ${typeColors[type.type.name]}">${type.type.name}</span>`
-    ).join('');
+      const stats = pokemon.stats.map(stat => {
+          const statTranslations = {
+              'hp': 'PS',
+              'attack': 'Ataque',
+              'defense': 'Defensa',
+              'special-attack': 'Ataque Especial',
+              'special-defense': 'Defensa Especial',
+              'speed': 'Velocidad'
+          };
+          const statName = statTranslations[stat.stat.name] || stat.stat.name;
+          return `<div class="stat-item">
+              <strong>${statName}:</strong>
+              <div class="stat-value">${stat.base_stat}</div>
+          </div>`;
+      }).join('');
 
-    const stats = pokemon.stats.map(stat => {
-        const statTranslations = {
-            'hp': 'PS',
-            'attack': 'Ataque',
-            'defense': 'Defensa',
-            'special-attack': 'Ataque Especial',
-            'special-defense': 'Defensa Especial',
-            'speed': 'Velocidad'
-        };
-        const statName = statTranslations[stat.stat.name] || stat.stat.name;
-        return `<div class="stat-item">
-            <strong>${statName}:</strong>
-            <div class="stat-value">${stat.base_stat}</div>
-        </div>`;
-    }).join('');
+      const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
+      const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
 
-    const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
-    const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
+      pokemonDetails.innerHTML = `
+          <div class="pokemon-info-screen">
+              <h2 class="pokemon-name">${pokemon.name}</h2>
+              <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
+              <div class="pokemon-types">${types}</div>
+              <div class="stats-container">${stats}</div>
+              <div class="pokemon-info">
+                  <p><strong>Altura:</strong> ${pokemon.height/10}m</p>
+                  <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
+              </div>
+          </div>
+      `;
 
-    pokemonDetails.innerHTML = `
-        <img class="pokemon-sprite" src="${primarySpriteUrl}" alt="${pokemon.name}"
-            onerror="this.onerror=null; this.src='${fallbackSpriteUrl}'">
-        <h2 class="pokemon-name">${pokemon.name}</h2>
-        <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
-        <div class="pokemon-types">${types}</div>
-        <div class="stats-container">${stats}</div>
-        <div class="pokemon-info">
-            <p><strong>Altura:</strong> ${pokemon.height/10}m</p>
-            <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
-        </div>
-    `;
+      // Update sprite after modal is displayed
+      const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
+      spriteImg.src = primarySpriteUrl;
+      spriteImg.onerror = function() {
+          this.onerror = null;
+          this.src = fallbackSpriteUrl;
+      };
 
-    modal.style.display = 'block';
-    modalContent.classList.add('show');
-}
+      modal.style.display = 'block';
+      modalContent.classList.add('show');
+  }
 
-closeBtn.onclick = () => modal.style.display = 'none';
+  closeBtn.onclick = () => modal.style.display = 'none';
 window.onclick = (event) => {
     if (event.target == modal) {
         modal.style.display = 'none';
