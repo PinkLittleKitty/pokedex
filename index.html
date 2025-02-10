@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="pokedex-container">
+        <header>
+            <h1>Pokédex</h1>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
+            </div>
+            <div class="gen-filters">
+                <button class="gen-btn active" data-gen="1">Gen 1</button>
+                <button class="gen-btn" data-gen="2">Gen 2</button>
+                <button class="gen-btn" data-gen="3">Gen 3</button>
+                <button class="gen-btn" data-gen="4">Gen 4</button>
+                <button class="gen-btn" data-gen="5">Gen 5</button>
+                <button class="gen-btn" data-gen="6">Gen 6</button>
+                <button class="gen-btn" data-gen="7">Gen 7</button>
+                <button class="gen-btn" data-gen="8">Gen 8</button>
+                <button class="gen-btn" data-gen="9">Gen 9</button>
+            </div>
+        </header>
+        
+        <main class="pokemon-grid">
+            <div class="screen-reflection"></div>
+            <!-- Pokemon cards will be dynamically inserted here -->
+        </main>
+
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close">×</span>
+                <div id="pokemon-details" class="pokemon-details"></div>
+            </div>
+        </div>
+    </div>
+    <div class="loading-indicator">Cargando...</div>
+    <script src="app.js"></script>
+</body>
+</html>
