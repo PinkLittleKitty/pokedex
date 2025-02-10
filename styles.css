@@ -87,16 +87,15 @@ h1 {
     font-size: 1rem;
     outline: none;
 }
-
 .gen-filters {
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
-    padding: 1rem 0;
+    padding: 1rem;
     margin: 0.5rem 0;
     -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
 }
-
 .gen-btn {
     background: rgba(0,0,0,0.2);
     border: 2px solid rgba(255,255,255,0.1);
@@ -510,7 +509,6 @@ header {
     box-shadow: inset 0 -5px 20px rgba(0,0,0,0.3);
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .game-btn {
