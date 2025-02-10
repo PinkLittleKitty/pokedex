@@ -11,8 +11,8 @@
     <div class="pokedex-container">
         <header>
             <h1>Pokédex</h1>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
+            <div>
+                <button class="game-btn" id="whosThatPokemon">¿Quién es ese Pokémon?</button>
             </div>
             <div class="gen-filters">
                 <button class="gen-btn active" data-gen="1">Gen 1</button>
@@ -24,7 +24,6 @@
                 <button class="gen-btn" data-gen="7">Gen 7</button>
                 <button class="gen-btn" data-gen="8">Gen 8</button>
                 <button class="gen-btn" data-gen="9">Gen 9</button>
-                <button class="game-btn" id="whosThatPokemon">¿Quién es ese Pokémon?</button>
             </div>
         </header>
         <main class="pokemon-grid">
@@ -64,7 +63,9 @@
               </div>
           </div>
     </div>
-    <div class="loading-indicator">Cargando...</div>
+    <div class="loading-indicator">
+        <div class="loading-pokeball"></div>
+    </div>
     <script src="app.js"></script>
 </body>
 </html>

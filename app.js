@@ -186,23 +186,6 @@ styleSheet.textContent = loadingStyles;
 document.head.appendChild(styleSheet);// Initialize with Gen 1
 fetchPokemonByGen(1);
 
-// Update search to work with current generation
-searchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    const pokemonCards = document.querySelectorAll('.pokemon-card');
-    
-    pokemonCards.forEach(card => {
-        const name = card.querySelector('.pokemon-name').textContent.toLowerCase();
-        const number = parseInt(card.querySelector('.pokemon-number').textContent.slice(1));
-        const { start, end } = genRanges[currentGen];
-        
-        // Only show cards from current generation that match search
-        const matchesSearch = name.includes(searchTerm);
-        const inCurrentGen = number >= start && number <= end;
-        card.style.display = matchesSearch && inCurrentGen ? 'block' : 'none';
-    });
-});
-
 fetchPokemonData();
 
 function showLoading() {
@@ -321,14 +304,14 @@ function updateScore() {
           gameResult.innerHTML = `
               <div class="result-popup correct">
                   <h2>CORRECTO!</h2>
-                  <p>Es ${correct}!</p>
+                  <p>¡Es ${correct}!</p>
               </div>`;
       } else {
           gameScore = 0;
           gameResult.innerHTML = `
               <div class="result-popup wrong">
-                  <h2>INCORRECTO!</h2>
-                  <p>Es ${correct}!</p>
+                  <h2>¡INCORRECTO!</h2>
+                  <p>¡Es ${correct}!</p>
                   <p>¡Se reinició la puntuación!</p>
               </div>`;
       }
@@ -337,6 +320,6 @@ function updateScore() {
     
       setTimeout(() => {
           showNextPokemon();
-      }, 2000);
+      }, 1000);
   }
   document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
