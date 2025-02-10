@@ -249,7 +249,8 @@ h1 {
     display: grid;
     grid-template-columns: 1fr;
     position: relative;
-    animation: openPokedex 0.5s ease-out;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 768px) {
@@ -263,6 +264,11 @@ h1 {
     padding: 1rem;
     display: flex;
     flex-direction: column;
+}
+
+.pokedex-right {
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--pokedex-red) 0%, #b30a24 100%);
 }
 
 @media (min-width: 768px) {
