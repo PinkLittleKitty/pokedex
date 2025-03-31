@@ -52,7 +52,7 @@ function createPokemonCard(pokemon) {
     pokemonGrid.appendChild(card);
 }
 
-function showPokemonDetails(pokemon) {
+async function showPokemonDetails(pokemon) {
     const pokemonDetails = document.getElementById('pokemon-details');
     const types = pokemon.types.map(type => 
         `<span class="type-badge" style="background-color: ${typeColors[type.type.name]}">${type.type.name}</span>`
@@ -87,6 +87,12 @@ function showPokemonDetails(pokemon) {
                 <p><strong>Altura:</strong> ${pokemon.height/10}m</p>
                 <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
             </div>
+            <div class="evolution-chain-container">
+                <h3>Cadena Evolutiva</h3>
+                <div id="evolutionChain" class="evolution-chain">
+                    <div class="loading-evolution">Cargando datos de evolución...</div>
+                </div>
+            </div>
         </div>
     `;
 
@@ -100,6 +106,9 @@ function showPokemonDetails(pokemon) {
 
     modal.style.display = 'block';
     modalContent.classList.add('show');
+    
+    // Fetch and display evolution chain
+    fetchEvolutionChain(pokemon.id);
 }
 
 closeBtn.onclick = () => modal.style.display = 'none';
@@ -225,34 +234,6 @@ const pokemonData = [];
     
       document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
   });
-      resetButton.addEventListener('click', () => {
-          // Reset all filters
-          activeTypeFilters = [];
-          document.querySelectorAll('.type-filter').forEach(btn => btn.classList.remove('active'));
-        
-          // Reset sort to default
-          document.querySelectorAll('.sort-btn').forEach(btn => {
-              btn.classList.remove('active');
-              if (btn.dataset.sort === 'id') btn.classList.add('active');
-          });
-          currentSortMethod = 'id';
-        
-          // Reset direction to ascending
-          document.querySelectorAll('.direction-btn').forEach(btn => {
-              btn.classList.remove('active');
-              if (btn.dataset.direction === 'asc') btn.classList.add('active');
-          });
-          sortDirection = 'asc';
-        
-          // Reset search input
-          searchInput.value = '';
-        
-          // Apply filters (which will now show all Pokémon)
-          applyFilters();
-        
-          // Close the panel
-          filterPanel.classList.remove('active');
-      });
 
   function applyFilters() {
       // Start with all Pokémon from the current generation
@@ -378,9 +359,7 @@ async function fetchPokemonByGen(gen) {
         
         // Set up filters if not already done
         setupTypeFilters();
-        setupSortButtons();
-        setupFilterButtons();
-        
+        setupSortButtons();        
     } catch (error) {
         console.error('Error fetching Pokemon:', error);
     } finally {
@@ -403,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFilterToggle();
     setupTypeFilters();
     setupSortButtons();
-    setupFilterButtons();
     setupSearchInput();
     
     document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
@@ -601,4 +579,184 @@ function checkAnswer(selected, correct) {
     setTimeout(() => {
         showNextPokemon();
     }, 1000);
+}
+
+async function fetchEvolutionChain(pokemonId) {
+    try {
+        // First, get the species data which contains the evolution chain URL
+        const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}/`);
+        const speciesData = await speciesResponse.json();
+        
+        // Then, fetch the evolution chain data
+        const evolutionResponse = await fetch(speciesData.evolution_chain.url);
+        const evolutionData = await evolutionResponse.json();
+        
+        // Process and display the evolution chain
+        displayEvolutionChain(evolutionData.chain);
+    } catch (error) {
+        console.error('Error fetching evolution chain:', error);
+        document.getElementById('evolutionChain').innerHTML = `
+            <div class="evolution-error">
+                Failed to load evolution data. Please try again later.
+            </div>
+        `;
+    }
+}
+
+function displayEvolutionChain(chain) {
+    const evolutionChainElement = document.getElementById('evolutionChain');
+    
+    // Clear loading message
+    evolutionChainElement.innerHTML = '';
+    
+    // Create the evolution chain HTML
+    const evolutionHTML = createEvolutionHTML(chain);
+    evolutionChainElement.innerHTML = evolutionHTML;
+    
+    // Add click events to evolution sprites
+    document.querySelectorAll('.evolution-pokemon').forEach(element => {
+        element.addEventListener('click', async () => {
+            const pokemonName = element.dataset.name;
+            try {
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}/`);
+                const pokemonData = await response.json();
+                showPokemonDetails(pokemonData);
+            } catch (error) {
+                console.error('Error fetching Pokémon details:', error);
+            }
+        });
+    });
+}
+
+function createEvolutionHTML(chain, level = 0) {
+    // Get the current Pokémon in the chain
+    const pokemon = chain.species;
+    const pokemonName = pokemon.name;
+    
+    // Get evolution details if this isn't the base form
+    let evolutionDetails = '';
+    if (chain.evolution_details && chain.evolution_details.length > 0) {
+        const details = chain.evolution_details[0];
+        evolutionDetails = getSpecialEvolutionDetails(details);
+    }
+    
+    // Create HTML for this Pokémon
+    const spriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemonName}.png`;
+    const fallbackUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokemonIdFromName(pokemonName)}.png`;
+    
+    let html = `
+        <div class="evolution-stage level-${level}">
+            ${level > 0 ? `
+                <div class="evolution-arrow">
+                    <span class="arrow-icon">→</span>
+                    <span class="evolution-detail">${evolutionDetails}</span>
+                </div>
+            ` : ''}
+            <div class="evolution-pokemon" data-name="${pokemonName}">
+                <img src="${spriteUrl}" alt="${pokemonName}" 
+                     onerror="this.onerror=null; this.src='${fallbackUrl}'">
+                <p class="evolution-name">${formatPokemonName(pokemonName)}</p>
+            </div>
+    `;
+    
+    // If there are evolutions, recursively add them
+    if (chain.evolves_to && chain.evolves_to.length > 0) {
+        // Single evolution path
+        if (chain.evolves_to.length === 1) {
+            html += createEvolutionHTML(chain.evolves_to[0], level + 1);
+        } 
+        // Multiple evolution paths (branching)
+        else if (chain.evolves_to.length > 1) {
+            html += `
+                <div class="evolution-branches">
+                    <div class="evolution-branch-container">
+            `;
+            
+            chain.evolves_to.forEach(evolution => {
+                html += `
+                    <div class="evolution-branch">
+                        ${createEvolutionHTML(evolution, level + 1)}
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    html += `</div>`;
+    
+    return html;
+}
+
+function getSpecialEvolutionDetails(details) {
+    if (!details) return 'Unknown';
+    
+    if (details.min_level) {
+        return `Nivel ${details.min_level}`;
+    } else if (details.item) {
+        return `Usa ${formatItemName(details.item.name)}`;
+    } else if (details.trigger && details.trigger.name === 'trade') {
+        if (details.held_item) {
+            return `Intercambiar Con ${formatItemName(details.held_item.name)}`;
+        }
+        return 'intercambiar';
+    } else if (details.min_happiness) {
+        if (details.time_of_day) {
+            return `Felicidad + ${details.time_of_day}`;
+        }
+        return `Felicidad ≥ ${details.min_happiness}`;
+    } else if (details.known_move) {
+        return `Aprende ${formatMoveName(details.known_move.name)}`;
+    } else if (details.location) {
+        return `En ${formatLocationName(details.location.name)}`;
+    } else if (details.time_of_day) {
+        return `Durante ${details.time_of_day}`;
+    }
+    
+    return 'Condición Especial';
+}
+
+function formatMoveName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+function formatLocationName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+// Helper function to format Pokémon names
+function formatPokemonName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+// Helper function to format item names
+function formatItemName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+// Helper function to get Pokémon ID from name (for fallback sprites)
+function getPokemonIdFromName(name) {
+    // This is a simplified approach - in a real app, you might want to use a mapping
+    for (const gen in genRanges) {
+        const { start, end } = genRanges[gen];
+        for (let i = start; i <= end; i++) {
+            const pokemon = pokemonData.find(p => p.id === i);
+            if (pokemon && pokemon.name === name) {
+                return i;
+            }
+        }
+    }
+    return 1; // Default to Bulbasaur if not found
 }

@@ -900,26 +900,277 @@ header {
 }
 
 .filter-panel.active {
-    max-height: 500px; 
+    max-height: 500px;
     opacity: 1;
     padding: 1rem;
     margin-top: 1rem;
     pointer-events: all;
 }
 
-@keyframes wiggle {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
-    50% { transform: rotate(0deg); }
-    75% { transform: rotate(10deg); }
-    100% { transform: rotate(0deg); }
+.evolution-chain-container {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.filter-toggle.active {
-    background: var(--text-light);
-    color: var(--pokedex-red);
+.evolution-chain-container h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #d8f3dc;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.filter-toggle:active {
-    animation: wiggle 0.3s ease;
+.evolution-chain {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    min-height: 150px;
+    position: relative;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.loading-evolution, .evolution-error {
+    color: #d8f3dc;
+    text-align: center;
+    width: 100%;
+    font-style: italic;
+    padding: 1rem;
+}
+
+/* Main evolution flow - horizontal layout */
+.evolution-stage {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.evolution-pokemon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.8rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.evolution-pokemon:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.evolution-pokemon img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.evolution-pokemon:hover img {
+    transform: scale(1.1);
+}
+
+.evolution-pokemon::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 3px;
+    background: rgba(216, 243, 220, 0.5);
+    border-radius: 3px;
+    opacity: 0;
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+}
+
+.evolution-pokemon:hover::after {
+    opacity: 1;
+    bottom: -8px;
+}
+
+.evolution-name {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    color: #d8f3dc;
+    text-transform: capitalize;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Arrow styling */
+.evolution-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0.5rem;
+    position: relative;
+}
+
+.arrow-icon {
+    font-size: 1.8rem;
+    color: #d8f3dc;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.arrow-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -15px;
+    right: -15px;
+    height: 2px;
+    background: rgba(216, 243, 220, 0.5);
+    transform: translateY(-50%);
+    z-index: -1;
+}
+
+.evolution-detail {
+    font-size: 0.8rem;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    color: #d8f3dc;
+    padding: 0.3rem 0.6rem;
+    border-radius: 20px;
+    margin-top: 0.5rem;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+
+.evolution-chain {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(216, 243, 220, 0.5) rgba(0, 0, 0, 0.2);
+}
+
+.evolution-chain::-webkit-scrollbar {
+    height: 6px;
+}
+
+.evolution-chain::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.evolution-chain::-webkit-scrollbar-thumb {
+    background-color: rgba(216, 243, 220, 0.5);
+    border-radius: 3px;
+}
+
+.evolution-branches {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.evolution-branch-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.evolution-branch {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0.5rem 0;
+    position: relative;
+}
+
+/* Add connecting lines for branches */
+.evolution-branch-container::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(216, 243, 220, 0.5);
+}
+
+.evolution-branch::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    width: 20px;
+    height: 2px;
+    background: rgba(216, 243, 220, 0.5);
+}
+
+/* For multiple branches, add a nicer visual */
+.evolution-branch-container:has(.evolution-branch:nth-child(n+2))::after {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(216, 243, 220, 0.8);
+    transform: translateY(-50%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .evolution-chain {
+        padding: 1rem 0.5rem;
+        justify-content: flex-start;
+    }
+    
+    .evolution-pokemon {
+        min-width: 80px;
+        padding: 0.5rem;
+    }
+    
+    .evolution-pokemon img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .evolution-detail {
+        font-size: 0.7rem;
+        max-width: 100px;
+    }
+}
+
+.loading-evolution {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.loading-evolution::after {
+    content: '';
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(216, 243, 220, 0.3);
+    border-radius: 50%;
+    border-top-color: #d8f3dc;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
