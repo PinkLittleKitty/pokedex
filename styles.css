@@ -26,9 +26,12 @@ body {
     position: relative;
     overflow: hidden;
     padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
+    flex-shrink: 0;
     background-color: var(--pokedex-red);
     padding: 1.5rem;
     position: relative;
@@ -285,15 +288,17 @@ h1 {
     -webkit-overflow-scrolling: touch;
     justify-content: flex-start;
 }
+
 .gen-btn {
     background: rgba(0,0,0,0.2);
     border: 2px solid rgba(255,255,255,0.1);
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     border-radius: 20px;
     color: var(--text-light);
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.3s ease;
+    font-size: 0.9rem;
 }
 
 .gen-btn:hover {
@@ -315,21 +320,52 @@ h1 {
     margin: 1rem;
     padding: 1rem;
     height: calc(100vh - 220px);
+    flex: 1;
     overflow-y: auto;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 1rem;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    -webkit-overflow-scrolling: touch;
+}
+
+.pokemon-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.pokemon-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.pokemon-grid::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.pokemon-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Firefox scrollbar */
+.pokemon-grid {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
 }
 
 .pokemon-card {
     background: #3a3a3a;
     border: 2px solid #4a4a4a;
     border-radius: 8px;
-    padding: 1rem;
+    padding: 1rem 0.5rem;
     text-align: center;
     transition: all 0.3s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
 }
 
 .pokemon-card:hover {
@@ -341,6 +377,7 @@ h1 {
 .pokemon-sprite {
     width: 96px;
     height: 96px;
+    object-fit: contain;
     margin: 0 auto;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
@@ -349,6 +386,8 @@ h1 {
     color: #888;
     font-size: 0.9rem;
     margin: 0.5rem 0;
+    width: 100%;
+    text-align: center;
 }
 
 .pokemon-name {
@@ -356,13 +395,25 @@ h1 {
     font-weight: bold;
     text-transform: capitalize;
     margin: 0.5rem 0;
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+    padding: 0 0.5rem;
+    font-size: 1rem;
 }
 
 .modal-content {
-    background: var(--screen-bg);
-    color: var(--text-light);
-    border: 4px solid var(--screen-border);
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    background: var(--pokedex-red);
+    display: grid;
+    grid-template-columns: 1fr;
+    position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100vh;
 }
 
 .type-badge {
@@ -384,15 +435,49 @@ h1 {
     border: 1px solid #4a4a4a;
 }
 
-@media (max-width: 600px) {
+@media (max-height: 700px) {
+    h1 {
+        font-size: 1.5rem;
+        margin: 0.3rem 0 0.7rem;
+    }
+    
+    .game-btn {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        margin: 0.3rem auto;
+    }
+    
+    .gen-filters {
+        padding: 0.5rem;
+        margin: 0.3rem 0;
+    }
+    
+    .gen-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
     .pokemon-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        margin: 0.5rem;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .pokemon-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
     
     .pokemon-card {
-        padding: 0.8rem;
+        padding: 0.7rem 0.4rem;
+    }
+    
+    .pokemon-sprite {
+        width: 80px;
+        height: 80px;
     }
 }
+
 .modal {
     display: none;
     position: fixed;
@@ -677,6 +762,17 @@ h1 {
     margin: 1.5rem 0;
 }
 
+.gen-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    justify-content: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .gen-filters::-webkit-scrollbar {
     height: 4px;
 }
@@ -692,12 +788,13 @@ h1 {
 }
 
 header {
-    background-color: var(--pokedex-red);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     padding: 1.5rem;
     position: relative;
     box-shadow: inset 0 -5px 20px rgba(0,0,0,0.3);
-    display: flex;
-    flex-direction: column;
 }
 
 .game-btn {
@@ -719,7 +816,8 @@ header {
     position: relative;
     transform: translateY(0);
     text-align: center;
-}.game-btn:hover {
+}
+.game-btn:hover {
     transform: translateY(-3px);
     background: #66BB6A;
     box-shadow: 0 6px 15px rgba(0,0,0,0.25),
@@ -730,12 +828,14 @@ header {
     transform: translateY(2px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
 header {
     background-color: var(--pokedex-red);
     padding: 1.5rem;
     position: relative;
     box-shadow: inset 0 -5px 20px rgba(0,0,0,0.3);
 }
+
 .game-screen {
     background: #9ba5b8;
     border: 12px solid var(--pokedex-dark);
@@ -1173,4 +1273,141 @@ header {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Pokémon Header with Sound Button */
+.pokemon-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    position: relative;
+    text-align: center;
+}
+.pokemon-header .pokemon-name {
+    flex: 1 0 100%;
+    margin: 0 0 0.5rem 0;
+    text-align: center;
+    font-size: 1.8rem;
+    text-transform: capitalize;
+}
+
+.pokemon-header .pokemon-number {
+    margin: 0;
+    color: rgba(216, 243, 220, 0.7);
+    font-size: 1.2rem;
+}
+.sound-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #d8f3dc;
+    transition: all 0.3s ease;
+    overflow: visible;
+}
+
+.sound-btn::before {
+    content: 'Gruñido';
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.sound-btn:hover::before {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.sound-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.sound-btn svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.3s ease;
+}
+
+.sound-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.sound-btn::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.sound-btn:hover::after {
+    opacity: 1;
+}
+
+/* Sound button playing state */
+.sound-btn.playing {
+    background: var(--glow-blue);
+    color: white;
+    animation: pulse 1s infinite;
+}
+
+.sound-btn.playing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0;
+    animation: ripple 1s infinite;
+}
+
+.sound-btn.error {
+    background: #f08030;
+    animation: shake 0.5s ease;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(133, 195, 233, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(133, 195, 233, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(133, 195, 233, 0); }
+}
+
+@keyframes ripple {
+    0% { opacity: 0.5; transform: scale(0.8); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
 }

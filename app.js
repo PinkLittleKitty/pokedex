@@ -79,8 +79,16 @@ async function showPokemonDetails(pokemon) {
 
     pokemonDetails.innerHTML = `
         <div class="pokemon-info-screen">
-            <h2 class="pokemon-name">${pokemon.name}</h2>
-            <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
+            <div class="pokemon-header">
+                <h2 class="pokemon-name">${pokemon.name}</h2>
+                <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
+                <button class="sound-btn" data-pokemon-id="${pokemon.id}" aria-label="Play Pokémon Cry">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="none" d="M0 0h24v24H0z"/>
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
             <div class="pokemon-types">${types}</div>
             <div class="stats-container">${stats}</div>
             <div class="pokemon-info">
@@ -88,15 +96,15 @@ async function showPokemonDetails(pokemon) {
                 <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
             </div>
             <div class="evolution-chain-container">
-                <h3>Cadena Evolutiva</h3>
+                <h3>Evolution Chain</h3>
                 <div id="evolutionChain" class="evolution-chain">
-                    <div class="loading-evolution">Cargando datos de evolución...</div>
+                    <div class="loading-evolution">Loading evolution data...</div>
                 </div>
             </div>
         </div>
+        <audio id="pokemonCry" preload="none"></audio>
     `;
 
-    // Update sprite after modal is displayed
     const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
     spriteImg.src = primarySpriteUrl;
     spriteImg.onerror = function() {
@@ -107,8 +115,9 @@ async function showPokemonDetails(pokemon) {
     modal.style.display = 'block';
     modalContent.classList.add('show');
     
-    // Fetch and display evolution chain
     fetchEvolutionChain(pokemon.id);
+    
+    setupSoundButton(pokemon.id);
 }
 
 closeBtn.onclick = () => modal.style.display = 'none';
@@ -132,24 +141,31 @@ const genRanges = {
 let currentGen = 1;
 
 const pokemonData = [];
-  function setupFilterToggle() {
-      const filterToggle = document.getElementById('filterToggle');
-      const filterPanel = document.getElementById('filterPanel');
+function setupFilterToggle() {
+    const filterToggle = document.getElementById('filterToggle');
+    const filterPanel = document.getElementById('filterPanel');
     
-      filterToggle.addEventListener('click', () => {
-          filterPanel.classList.toggle('active');
+    if (!filterToggle || !filterPanel) {
+        console.error('Filter toggle or panel elements not found');
+        return;
+    }
+    
+    filterToggle.addEventListener('click', () => {
+        console.log('Filter toggle clicked');
+        filterPanel.classList.toggle('active');
         
-          // Add a cute animation when opening
-          if (filterPanel.classList.contains('active')) {
-              filterToggle.style.animation = 'wiggle 0.5s ease';
-              setTimeout(() => {
-                  filterToggle.style.animation = '';
-              }, 500);
-          }
-      });
-  }
+        // Add a cute animation when opening
+        if (filterPanel.classList.contains('active')) {
+            filterToggle.style.animation = 'wiggle 0.5s ease';
+            setTimeout(() => {
+                filterToggle.style.animation = '';
+            }, 500);
+        }
+    });
+}
 
   function setupTypeFilters() {
+        setupFilterToggle();
       const typeFiltersContainer = document.querySelector('.type-filters');
     
       // Clear existing filters
@@ -307,6 +323,63 @@ function displayFilteredPokemon(filteredPokemon) {
         noResults.textContent = 'No Pokémon found matching your filters';
         pokemonGrid.appendChild(noResults);
     }
+}
+
+function setupSoundButton(pokemonId) {
+    const soundButton = document.querySelector('.sound-btn');
+    const audioElement = document.getElementById('pokemonCry');
+    
+    const pokemonName = getPokemonNameById(pokemonId);
+    const cryUrl = `https://play.pokemonshowdown.com/audio/cries/${pokemonName.toLowerCase()}.mp3`;
+    audioElement.src = cryUrl;
+    
+    soundButton.setAttribute('aria-label', `Reproducir el sonido de ${pokemonName}`);
+    soundButton.setAttribute('title', `Reproducir el sonido de ${pokemonName}`);
+    
+    soundButton.addEventListener('click', () => {
+        playPokemonCry(audioElement, soundButton);
+    });
+    
+    soundButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            playPokemonCry(audioElement, soundButton);
+        }
+    });
+    
+    audioElement.load();
+}
+
+function playPokemonCry(audioElement, button) {
+
+    button.classList.add('playing');
+
+    audioElement.play().catch(error => {
+        console.error('Error playing Pokémon cry:', error);
+        showSoundError(button);
+    });
+
+    audioElement.onended = () => {
+        button.classList.remove('playing');
+    };
+    
+    audioElement.onerror = () => {
+        button.classList.remove('playing');
+        showSoundError(button);
+    };
+}
+
+function showSoundError(button) {
+    button.classList.add('error');
+    
+    setTimeout(() => {
+        button.classList.remove('error');
+    }, 2000);
+}
+
+function getPokemonNameById(id) {
+    const pokemon = pokemonData.find(p => p.id === id);
+    return pokemon ? pokemon.name : '';
 }
 
 async function fetchPokemonByGen(gen) {
@@ -703,7 +776,7 @@ function getSpecialEvolutionDetails(details) {
         if (details.held_item) {
             return `Intercambiar Con ${formatItemName(details.held_item.name)}`;
         }
-        return 'intercambiar';
+        return 'Intercambiar';
     } else if (details.min_happiness) {
         if (details.time_of_day) {
             return `Felicidad + ${details.time_of_day}`;
