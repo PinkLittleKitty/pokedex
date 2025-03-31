@@ -6,6 +6,9 @@
     <title>Pokédex</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#dc0a2d">
+    <link rel="icon" href="icon.png">
 </head>
 <body>
     <div class="pokedex-container">
@@ -24,6 +27,30 @@
                 <button class="gen-btn" data-gen="7">Gen 7</button>
                 <button class="gen-btn" data-gen="8">Gen 8</button>
                 <button class="gen-btn" data-gen="9">Gen 9</button>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
+                    <button id="filterToggle" class="filter-toggle" aria-label="Filtros">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="none" d="M0 0h24v24H0z"/>
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="filterPanel" class="filter-panel">
+                    <h3>Filtrar por Tipo</h3>
+                    <div class="type-filters">
+                        <!-- Type filters will be added dynamically via JavaScript -->
+                    </div>
+                <div class="sort-options">
+                    <button class="sort-btn" data-sort="id">Ordenar por ID</button>
+                    <button class="sort-btn" data-sort="name">Ordenar por Nombre</button>
+                    <button class="sort-btn" data-sort="height">Ordenar por Altura</button>
+                    <button class="sort-btn" data-sort="weight">Ordenar por Peso</button>
+                </div>
             </div>
         </header>
         <main class="pokemon-grid">

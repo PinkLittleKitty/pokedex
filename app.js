@@ -6,6 +6,9 @@ const closeBtn = document.querySelector('.close');
 const POKEMON_COUNT = 151;
 let isLoading = false;
 let currentRequest = null;
+let activeTypeFilters = [];
+let currentSortMethod = 'id';
+let sortDirection = 'asc';
 
 const typeColors = {
     normal: '#A8A878',
@@ -48,57 +51,58 @@ function createPokemonCard(pokemon) {
     card.addEventListener('click', () => showPokemonDetails(pokemon));
     pokemonGrid.appendChild(card);
 }
-  function showPokemonDetails(pokemon) {
-      const pokemonDetails = document.getElementById('pokemon-details');
-      const types = pokemon.types.map(type => 
-          `<span class="type-badge" style="background-color: ${typeColors[type.type.name]}">${type.type.name}</span>`
-      ).join('');
 
-      const stats = pokemon.stats.map(stat => {
-          const statTranslations = {
-              'hp': 'PS',
-              'attack': 'Ataque',
-              'defense': 'Defensa',
-              'special-attack': 'Ataque Especial',
-              'special-defense': 'Defensa Especial',
-              'speed': 'Velocidad'
-          };
-          const statName = statTranslations[stat.stat.name] || stat.stat.name;
-          return `<div class="stat-item">
-              <strong>${statName}:</strong>
-              <div class="stat-value">${stat.base_stat}</div>
-          </div>`;
-      }).join('');
+function showPokemonDetails(pokemon) {
+    const pokemonDetails = document.getElementById('pokemon-details');
+    const types = pokemon.types.map(type => 
+        `<span class="type-badge" style="background-color: ${typeColors[type.type.name]}">${type.type.name}</span>`
+    ).join('');
 
-      const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
-      const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
+    const stats = pokemon.stats.map(stat => {
+        const statTranslations = {
+            'hp': 'PS',
+            'attack': 'Ataque',
+            'defense': 'Defensa',
+            'special-attack': 'Ataque Especial',
+            'special-defense': 'Defensa Especial',
+            'speed': 'Velocidad'
+        };
+        const statName = statTranslations[stat.stat.name] || stat.stat.name;
+        return `<div class="stat-item">
+            <strong>${statName}:</strong>
+            <div class="stat-value">${stat.base_stat}</div>
+        </div>`;
+    }).join('');
 
-      pokemonDetails.innerHTML = `
-          <div class="pokemon-info-screen">
-              <h2 class="pokemon-name">${pokemon.name}</h2>
-              <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
-              <div class="pokemon-types">${types}</div>
-              <div class="stats-container">${stats}</div>
-              <div class="pokemon-info">
-                  <p><strong>Altura:</strong> ${pokemon.height/10}m</p>
-                  <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
-              </div>
-          </div>
-      `;
+    const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
+    const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
 
-      // Update sprite after modal is displayed
-      const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
-      spriteImg.src = primarySpriteUrl;
-      spriteImg.onerror = function() {
-          this.onerror = null;
-          this.src = fallbackSpriteUrl;
-      };
+    pokemonDetails.innerHTML = `
+        <div class="pokemon-info-screen">
+            <h2 class="pokemon-name">${pokemon.name}</h2>
+            <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
+            <div class="pokemon-types">${types}</div>
+            <div class="stats-container">${stats}</div>
+            <div class="pokemon-info">
+                <p><strong>Altura:</strong> ${pokemon.height/10}m</p>
+                <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
+            </div>
+        </div>
+    `;
 
-      modal.style.display = 'block';
-      modalContent.classList.add('show');
-  }
+    // Update sprite after modal is displayed
+    const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
+    spriteImg.src = primarySpriteUrl;
+    spriteImg.onerror = function() {
+        this.onerror = null;
+        this.src = fallbackSpriteUrl;
+    };
 
-  closeBtn.onclick = () => modal.style.display = 'none';
+    modal.style.display = 'block';
+    modalContent.classList.add('show');
+}
+
+closeBtn.onclick = () => modal.style.display = 'none';
 window.onclick = (event) => {
     if (event.target == modal) {
         modal.style.display = 'none';
@@ -119,6 +123,211 @@ const genRanges = {
 let currentGen = 1;
 
 const pokemonData = [];
+  function setupFilterToggle() {
+      const filterToggle = document.getElementById('filterToggle');
+      const filterPanel = document.getElementById('filterPanel');
+    
+      filterToggle.addEventListener('click', () => {
+          filterPanel.classList.toggle('active');
+        
+          // Add a cute animation when opening
+          if (filterPanel.classList.contains('active')) {
+              filterToggle.style.animation = 'wiggle 0.5s ease';
+              setTimeout(() => {
+                  filterToggle.style.animation = '';
+              }, 500);
+          }
+      });
+  }
+
+  function setupTypeFilters() {
+      const typeFiltersContainer = document.querySelector('.type-filters');
+    
+      // Clear existing filters
+      typeFiltersContainer.innerHTML = '';
+    
+      // Create a button for each type
+      Object.keys(typeColors).forEach(type => {
+          const typeButton = document.createElement('button');
+          typeButton.className = 'type-filter';
+          typeButton.dataset.type = type;
+          typeButton.textContent = type;
+          typeButton.style.backgroundColor = typeColors[type];
+        
+          // Add click event
+          typeButton.addEventListener('click', () => {
+              typeButton.classList.toggle('active');
+            
+              // Update active filters
+              if (typeButton.classList.contains('active')) {
+                  if (!activeTypeFilters.includes(type)) {
+                      activeTypeFilters.push(type);
+                  }
+              } else {
+                  const index = activeTypeFilters.indexOf(type);
+                  if (index !== -1) {
+                      activeTypeFilters.splice(index, 1);
+                  }
+              }
+            
+              // Apply filters immediately
+              applyFilters();
+          });
+        
+          typeFiltersContainer.appendChild(typeButton);
+      });
+  }
+
+  function setupSortButtons() {
+      const sortButtons = document.querySelectorAll('.sort-btn');
+    
+      sortButtons.forEach(button => {
+          button.addEventListener('click', () => {
+              // Update active button
+              sortButtons.forEach(btn => btn.classList.remove('active'));
+              button.classList.add('active');
+            
+              // Update current sort method
+              currentSortMethod = button.dataset.sort;
+            
+              // Apply filters immediately
+              applyFilters();
+          });
+      });
+    
+      // If you have direction buttons
+      const directionButtons = document.querySelectorAll('.direction-btn');
+      if (directionButtons.length > 0) {
+          directionButtons.forEach(button => {
+              button.addEventListener('click', () => {
+                  // Update active button
+                  directionButtons.forEach(btn => btn.classList.remove('active'));
+                  button.classList.add('active');
+                
+                  // Update sort direction
+                  sortDirection = button.dataset.direction;
+                
+                  // Apply filters immediately
+                  applyFilters();
+              });
+          });
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      fetchPokemonByGen("1"); // Start with Gen 1
+    
+      // Set up filter panel and controls
+      setupFilterToggle();
+      setupTypeFilters();
+      setupSortButtons();
+      setupSearchInput();
+    
+      document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
+  });
+      resetButton.addEventListener('click', () => {
+          // Reset all filters
+          activeTypeFilters = [];
+          document.querySelectorAll('.type-filter').forEach(btn => btn.classList.remove('active'));
+        
+          // Reset sort to default
+          document.querySelectorAll('.sort-btn').forEach(btn => {
+              btn.classList.remove('active');
+              if (btn.dataset.sort === 'id') btn.classList.add('active');
+          });
+          currentSortMethod = 'id';
+        
+          // Reset direction to ascending
+          document.querySelectorAll('.direction-btn').forEach(btn => {
+              btn.classList.remove('active');
+              if (btn.dataset.direction === 'asc') btn.classList.add('active');
+          });
+          sortDirection = 'asc';
+        
+          // Reset search input
+          searchInput.value = '';
+        
+          // Apply filters (which will now show all Pokémon)
+          applyFilters();
+        
+          // Close the panel
+          filterPanel.classList.remove('active');
+      });
+
+  function applyFilters() {
+      // Start with all Pokémon from the current generation
+      let filteredPokemon = [...pokemonData];
+    
+      // Apply search filter
+      const searchTerm = searchInput.value.toLowerCase();
+      if (searchTerm) {
+          filteredPokemon = filteredPokemon.filter(pokemon => 
+              pokemon.name.toLowerCase().includes(searchTerm) || 
+              pokemon.id.toString().includes(searchTerm)
+          );
+      }
+    
+      // Apply type filters
+      if (activeTypeFilters.length > 0) {
+          filteredPokemon = filteredPokemon.filter(pokemon => {
+              const pokemonTypes = pokemon.types.map(type => type.type.name);
+              return activeTypeFilters.some(type => pokemonTypes.includes(type));
+          });
+      }
+    
+      // Apply sorting
+      filteredPokemon.sort((a, b) => {
+          let valueA, valueB;
+        
+          switch (currentSortMethod) {
+              case 'name':
+                  valueA = a.name;
+                  valueB = b.name;
+                  break;
+              case 'height':
+                  valueA = a.height;
+                  valueB = b.height;
+                  break;
+              case 'weight':
+                  valueA = a.weight;
+                  valueB = b.weight;
+                  break;
+              case 'id':
+              default:
+                  valueA = a.id;
+                  valueB = b.id;
+                  break;
+          }
+        
+          if (sortDirection === 'asc') {
+              return valueA > valueB ? 1 : -1;
+          } else {
+              return valueA < valueB ? 1 : -1;
+          }
+      });
+    
+      // Update the display
+      displayFilteredPokemon(filteredPokemon);
+  }
+
+function displayFilteredPokemon(filteredPokemon) {
+    // Clear the grid
+    pokemonGrid.innerHTML = '';
+    
+    // Add filtered Pokémon to the grid
+    filteredPokemon.forEach(pokemon => {
+        createPokemonCard(pokemon);
+    });
+    
+    // Show message if no results
+    if (filteredPokemon.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results';
+        noResults.textContent = 'No Pokémon found matching your filters';
+        pokemonGrid.appendChild(noResults);
+    }
+}
+
 async function fetchPokemonByGen(gen) {
     try {
         if (isLoading) return;
@@ -144,7 +353,33 @@ async function fetchPokemonByGen(gen) {
         
         pokemonData.length = 0;
         pokemonData.push(...fetchedPokemonData);
+        
+        // Reset filters
+        activeTypeFilters = [];
+        document.querySelectorAll('.type-filter').forEach(btn => btn.classList.remove('active'));
+        searchInput.value = '';
+        
+        // Reset sort to default
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.sort === 'id') btn.classList.add('active');
+        });
+        currentSortMethod = 'id';
+        
+        // Reset direction to ascending
+        document.querySelectorAll('.direction-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.direction === 'asc') btn.classList.add('active');
+        });
+        sortDirection = 'asc';
+        
+        // Display all Pokémon
         pokemonData.forEach(data => createPokemonCard(data));
+        
+        // Set up filters if not already done
+        setupTypeFilters();
+        setupSortButtons();
+        setupFilterButtons();
         
     } catch (error) {
         console.error('Error fetching Pokemon:', error);
@@ -154,15 +389,34 @@ async function fetchPokemonByGen(gen) {
     }
 }
 
-  document.querySelectorAll('.gen-btn').forEach(button => {
-      button.addEventListener('click', (e) => {
-          const selectedGen = e.target.dataset.gen;
-          document.querySelectorAll('.gen-btn').forEach(btn => btn.classList.remove('active'));
-          e.target.classList.add('active');
-          currentGen = parseInt(selectedGen);
-          fetchPokemonByGen(selectedGen);
-      });
-  });
+function setupSearchInput() {
+    searchInput.addEventListener('input', () => {
+        // Apply filters as user types
+        applyFilters();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchPokemonByGen("1"); // Start with Gen 1
+    
+    // Set up filter panel and controls
+    setupFilterToggle();
+    setupTypeFilters();
+    setupSortButtons();
+    setupFilterButtons();
+    setupSearchInput();
+    
+    document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
+});
+document.querySelectorAll('.gen-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+        const selectedGen = e.target.dataset.gen;
+        document.querySelectorAll('.gen-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        currentGen = parseInt(selectedGen);
+        fetchPokemonByGen(selectedGen);
+    });
+});
 
   const loadingStyles = `
   .loading-indicator {
@@ -316,36 +570,35 @@ function updateScore() {
     `;
 }
 
-  function checkAnswer(selected, correct) {
-      const gameResult = document.getElementById('gameResult');
-      const mysteryPokemon = document.getElementById('mysteryPokemon');
-      const answerButtons = document.querySelectorAll('.answer-btn');
-    
-      mysteryPokemon.classList.remove('silhouette');
-      answerButtons.forEach(btn => btn.disabled = true);
-    
-      if(selected === correct) {
-          gameScore += 100;
-          setHighScore(gameScore);
-          gameResult.innerHTML = `
-              <div class="result-popup correct">
-                  <h2>CORRECTO!</h2>
-                  <p>¡Es ${correct}!</p>
-              </div>`;
-      } else {
-          gameScore = 0;
-          gameResult.innerHTML = `
-              <div class="result-popup wrong">
-                  <h2>¡INCORRECTO!</h2>
-                  <p>¡Es ${correct}!</p>
-                  <p>¡Se reinició la puntuación!</p>
-              </div>`;
-      }
-    
-      updateScore();
-    
-      setTimeout(() => {
-          showNextPokemon();
-      }, 1000);
-  }
-  document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
+function checkAnswer(selected, correct) {
+    const gameResult = document.getElementById('gameResult');
+    const mysteryPokemon = document.getElementById('mysteryPokemon');
+    const answerButtons = document.querySelectorAll('.answer-btn');
+
+    mysteryPokemon.classList.remove('silhouette');
+    answerButtons.forEach(btn => btn.disabled = true);
+
+    if(selected === correct) {
+        gameScore += 100;
+        setHighScore(gameScore);
+        gameResult.innerHTML = `
+            <div class="result-popup correct">
+                <h2>CORRECTO!</h2>
+                <p>¡Es ${correct}!</p>
+            </div>`;
+    } else {
+        gameScore = 0;
+        gameResult.innerHTML = `
+            <div class="result-popup wrong">
+                <h2>¡INCORRECTO!</h2>
+                <p>¡Es ${correct}!</p>
+                <p>¡Se reinició la puntuación!</p>
+            </div>`;
+    }
+
+    updateScore();
+
+    setTimeout(() => {
+        showNextPokemon();
+    }, 1000);
+}
