@@ -28,14 +28,6 @@ const typeColors = {
     fairy: '#EE99AC'
 };
 
-async function fetchPokemonData() {
-    for (let i = 1; i <= POKEMON_COUNT; i++) {
-        const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
-        const data = await response.json();
-        createPokemonCard(data);
-    }
-}
-
 function createPokemonCard(pokemon) {
     const card = document.createElement('div');
     card.classList.add('pokemon-card');
@@ -127,7 +119,6 @@ const genRanges = {
 let currentGen = 1;
 
 const pokemonData = [];
-
 async function fetchPokemonByGen(gen) {
     try {
         if (isLoading) return;
@@ -135,18 +126,23 @@ async function fetchPokemonByGen(gen) {
         showLoading();
         
         pokemonGrid.innerHTML = '';
-        const { start, end } = genRanges[gen];
         
-        const promises = [];
-        for (let i = start; i <= end; i++) {
-            promises.push(
-                fetch(`https://pokeapi.co/api/v2/pokemon/${i}`)
-                    .then(response => response.json())
-            );
+        // Use the global variable instead of fetching
+        let fetchedPokemonData;
+        switch(gen) {
+            case "1": fetchedPokemonData = gen1Data; break;
+            case "2": fetchedPokemonData = gen2Data; break;
+            case "3": fetchedPokemonData = gen3Data; break;
+            case "4": fetchedPokemonData = gen4Data; break;
+            case "5": fetchedPokemonData = gen5Data; break;
+            case "6": fetchedPokemonData = gen6Data; break;
+            case "7": fetchedPokemonData = gen7Data; break;
+            case "8": fetchedPokemonData = gen8Data; break;
+            case "9": fetchedPokemonData = gen9Data; break;
+            default: fetchedPokemonData = gen1Data;
         }
         
-        const fetchedPokemonData = await Promise.all(promises);
-        pokemonData.length = 0; // Clear previous gen data
+        pokemonData.length = 0;
         pokemonData.push(...fetchedPokemonData);
         pokemonData.forEach(data => createPokemonCard(data));
         
@@ -158,35 +154,60 @@ async function fetchPokemonByGen(gen) {
     }
 }
 
-document.querySelectorAll('.gen-btn').forEach(button => {
-    button.addEventListener('click', (e) => {
-        const selectedGen = e.target.dataset.gen;
-        document.querySelectorAll('.gen-btn').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
-        currentGen = parseInt(selectedGen);
-        fetchPokemonByGen(selectedGen);
-    });
-});
+  document.querySelectorAll('.gen-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+          const selectedGen = e.target.dataset.gen;
+          document.querySelectorAll('.gen-btn').forEach(btn => btn.classList.remove('active'));
+          e.target.classList.add('active');
+          currentGen = parseInt(selectedGen);
+          fetchPokemonByGen(selectedGen);
+      });
+  });
 
-const loadingStyles = `
-.loading-indicator {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 1rem 2rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}`;
+  const loadingStyles = `
+  .loading-indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+  }`;
 
+  async function fetchAllPokemon() {
+      try {
+          if (isLoading) return;
+          isLoading = true;
+          showLoading();
+        
+          if (allPokemonData.length > 0) {
+              // Data already loaded
+              hideLoading();
+              isLoading = false;
+              return;
+          }
+        
+          // Load all generations from local JSON files
+          for (let gen = 1; gen <= 9; gen++) {
+              const response = await fetch(`data/gen${gen}.json`);
+              const genData = await response.json();
+              allPokemonData.push(...genData);
+          }
+        
+      } catch (error) {
+          console.error('Error fetching Pokemon:', error);
+      } finally {
+          hideLoading();
+          isLoading = false;
+      }
+  }
 const styleSheet = document.createElement('style');
 styleSheet.textContent = loadingStyles;
-document.head.appendChild(styleSheet);// Initialize with Gen 1
+document.head.appendChild(styleSheet);
 fetchPokemonByGen(1);
-
-fetchPokemonData();
 
 function showLoading() {
     const indicator = document.querySelector('.loading-indicator');
@@ -218,31 +239,36 @@ function setHighScore(score) {
 }
 
 async function fetchAllPokemon() {
-  try {
-      if (isLoading) return;
-      isLoading = true;
-      showLoading();
+    try {
+        if (isLoading) return;
+        isLoading = true;
+        showLoading();
         
-      const promises = [];
-      for (let i = 1; i <= 1010; i++) {
-          promises.push(
-              fetch(`https://pokeapi.co/api/v2/pokemon/${i}`)
-                  .then(response => response.json())
-          );
-      }
+        if (allPokemonData.length > 0) {
+            // Data already loaded
+            hideLoading();
+            isLoading = false;
+            return;
+        }
         
-      const fetchedPokemonData = await Promise.all(promises);
-      allPokemonData.push(...fetchedPokemonData);
+        // Use the global variables instead of fetching
+        allPokemonData.push(...gen1Data);
+        allPokemonData.push(...gen2Data);
+        allPokemonData.push(...gen3Data);
+        allPokemonData.push(...gen4Data);
+        allPokemonData.push(...gen5Data);
+        allPokemonData.push(...gen6Data);
+        allPokemonData.push(...gen7Data);
+        allPokemonData.push(...gen8Data);
+        allPokemonData.push(...gen9Data);
         
-  } catch (error) {
-      console.error('Error fetching Pokemon:', error);
-  } finally {
-      hideLoading();
-      isLoading = false;
-  }
-}
-
-async function startWhosThatPokemon() {
+    } catch (error) {
+        console.error('Error fetching Pokemon:', error);
+    } finally {
+        hideLoading();
+        isLoading = false;
+    }
+}async function startWhosThatPokemon() {
     if (allPokemonData.length === 0) {
         await fetchAllPokemon();
     }
