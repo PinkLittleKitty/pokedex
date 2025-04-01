@@ -41,83 +41,34 @@ function createPokemonCard(pokemon) {
     // Fallback sprite URL from PokeAPI official artwork
     const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
     
+    // Create type badges
+    const types = pokemon.types.map(type => {
+        const typeName = type.type.name;
+        return `
+            <span class="type-badge ${typeName}" style="background-color: ${typeColors[typeName]}">
+                <img class="type-icon" src="https://raw.githubusercontent.com/duiker101/pokemon-type-svg-icons/master/icons/${typeName}.svg" 
+                     alt="${typeName}" onerror="handleTypeIconError(this)">
+            </span>
+        `;
+    }).join('');
+    
     card.innerHTML = `
         <img class="pokemon-sprite" src="${primarySpriteUrl}" alt="${pokemon.name}" 
              onerror="this.onerror=null; this.src='${fallbackSpriteUrl}'">
         <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
         <h2 class="pokemon-name">${pokemon.name}</h2>
+        <div class="card-types">${types}</div>
     `;
     
     card.addEventListener('click', () => showPokemonDetails(pokemon));
     pokemonGrid.appendChild(card);
 }
 
-async function showPokemonDetails(pokemon) {
-    const pokemonDetails = document.getElementById('pokemon-details');
-    const types = pokemon.types.map(type => 
-        `<span class="type-badge" style="background-color: ${typeColors[type.type.name]}">${type.type.name}</span>`
-    ).join('');
-
-    const stats = pokemon.stats.map(stat => {
-        const statTranslations = {
-            'hp': 'PS',
-            'attack': 'Ataque',
-            'defense': 'Defensa',
-            'special-attack': 'Ataque Especial',
-            'special-defense': 'Defensa Especial',
-            'speed': 'Velocidad'
-        };
-        const statName = statTranslations[stat.stat.name] || stat.stat.name;
-        return `<div class="stat-item">
-            <strong>${statName}:</strong>
-            <div class="stat-value">${stat.base_stat}</div>
-        </div>`;
-    }).join('');
-
-    const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
-    const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
-
-    pokemonDetails.innerHTML = `
-        <div class="pokemon-info-screen">
-            <div class="pokemon-header">
-                <h2 class="pokemon-name">${pokemon.name}</h2>
-                <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
-                <button class="sound-btn" data-pokemon-id="${pokemon.id}" aria-label="Play Pokémon Cry">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="none" d="M0 0h24v24H0z"/>
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="pokemon-types">${types}</div>
-            <div class="stats-container">${stats}</div>
-            <div class="pokemon-info">
-                <p><strong>Altura:</strong> ${pokemon.height/10}m</p>
-                <p><strong>Peso:</strong> ${pokemon.weight/10}kg</p>
-            </div>
-            <div class="evolution-chain-container">
-                <h3>Evolution Chain</h3>
-                <div id="evolutionChain" class="evolution-chain">
-                    <div class="loading-evolution">Loading evolution data...</div>
-                </div>
-            </div>
-        </div>
-        <audio id="pokemonCry" preload="none"></audio>
-    `;
-
-    const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
-    spriteImg.src = primarySpriteUrl;
-    spriteImg.onerror = function() {
-        this.onerror = null;
-        this.src = fallbackSpriteUrl;
-    };
-
-    modal.style.display = 'block';
-    modalContent.classList.add('show');
-    
-    fetchEvolutionChain(pokemon.id);
-    
-    setupSoundButton(pokemon.id);
+function handleTypeIconError(img) {
+    img.onerror = null;
+    img.style.display = 'none';
+    img.parentElement.style.paddingLeft = '0.5rem';
+    img.parentElement.style.paddingRight = '0.5rem';
 }
 
 closeBtn.onclick = () => modal.style.display = 'none';
@@ -670,7 +621,7 @@ async function fetchEvolutionChain(pokemonId) {
         console.error('Error fetching evolution chain:', error);
         document.getElementById('evolutionChain').innerHTML = `
             <div class="evolution-error">
-                Failed to load evolution data. Please try again later.
+                Error al cargar datos de evolución. Por favor, inténtalo de nuevo más tarde.
             </div>
         `;
     }
@@ -679,14 +630,11 @@ async function fetchEvolutionChain(pokemonId) {
 function displayEvolutionChain(chain) {
     const evolutionChainElement = document.getElementById('evolutionChain');
     
-    // Clear loading message
     evolutionChainElement.innerHTML = '';
     
-    // Create the evolution chain HTML
     const evolutionHTML = createEvolutionHTML(chain);
     evolutionChainElement.innerHTML = evolutionHTML;
     
-    // Add click events to evolution sprites
     document.querySelectorAll('.evolution-pokemon').forEach(element => {
         element.addEventListener('click', async () => {
             const pokemonName = element.dataset.name;
@@ -710,12 +658,12 @@ function createEvolutionHTML(chain, level = 0) {
     let evolutionDetails = '';
     if (chain.evolution_details && chain.evolution_details.length > 0) {
         const details = chain.evolution_details[0];
-        evolutionDetails = getSpecialEvolutionDetails(details);
+        evolutionDetails = getEvolutionDetails(details);
     }
     
     // Create HTML for this Pokémon
     const spriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemonName}.png`;
-    const fallbackUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokemonIdFromName(pokemonName)}.png`;
+    const fallbackUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokemonIdFromUrl(pokemon.url)}.png`;
     
     let html = `
         <div class="evolution-stage level-${level}">
@@ -763,6 +711,67 @@ function createEvolutionHTML(chain, level = 0) {
     html += `</div>`;
     
     return html;
+}
+
+function getEvolutionDetails(details) {
+    if (!details) return 'Desconocido';
+    
+    if (details.min_level) {
+        return `Nivel ${details.min_level}`;
+    } else if (details.item) {
+        return `Usa ${formatItemName(details.item.name)}`;
+    } else if (details.trigger && details.trigger.name === 'trade') {
+        if (details.held_item) {
+            return `Intercambiar con ${formatItemName(details.held_item.name)}`;
+        }
+        return 'Intercambiar';
+    } else if (details.min_happiness) {
+        if (details.time_of_day) {
+            return `Felicidad + ${details.time_of_day === 'day' ? 'Día' : 'Noche'}`;
+        }
+        return `Felicidad ≥ ${details.min_happiness}`;
+    } else if (details.known_move) {
+        return `Aprende ${formatMoveName(details.known_move.name)}`;
+    } else if (details.location) {
+        return `En ${formatLocationName(details.location.name)}`;
+    } else if (details.time_of_day) {
+        const timeTranslations = {
+            'day': 'Día',
+            'night': 'Noche'
+        };
+        return `Durante ${timeTranslations[details.time_of_day] || details.time_of_day}`;
+    }
+    
+    return 'Condición Especial';
+}
+
+function formatPokemonName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+function formatItemName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+function formatMoveName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+function formatLocationName(name) {
+    return name.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+}
+
+function getPokemonIdFromUrl(url) {
+    const matches = url.match(/\/(\d+)\/$/);
+    return matches ? matches[1] : 1;
 }
 
 function getSpecialEvolutionDetails(details) {
@@ -832,4 +841,871 @@ function getPokemonIdFromName(name) {
         }
     }
     return 1; // Default to Bulbasaur if not found
+}
+
+async function fetchPokemonHabitat(pokemonId) {
+    try {
+        // First, get the species data which contains the habitat info
+        const speciesResponse = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemonId}/`);
+        const speciesData = await speciesResponse.json();
+        
+        // Display the habitat information
+        displayHabitatInfo(speciesData);
+        
+        // Then fetch location data
+        fetchPokemonLocations(pokemonId);
+    } catch (error) {
+        console.error('Error fetching habitat data:', error);
+        document.getElementById('pokemonHabitat').innerHTML = `
+            <div class="no-habitat">
+                Failed to load habitat data. Please try again later.
+            </div>
+        `;
+    }
+}
+
+// Function to display habitat information
+function displayHabitatInfo(speciesData) {
+    const habitatContainer = document.getElementById('pokemonHabitat');
+    
+    // Check if habitat data exists
+    if (!speciesData.habitat) {
+        habitatContainer.innerHTML = `
+            <div class="no-habitat">
+                No hay información de hábitat disponible para este Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    // Get habitat name and description
+    const habitatName = speciesData.habitat.name;
+    
+    // Map habitat names to Spanish descriptions
+    const habitatDescriptions = {
+        'cave': 'Ambientes oscuros y rocosos que se encuentran bajo tierra o en montañas.',
+        'forest': 'Áreas boscosas con densa cobertura de árboles y sotobosque.',
+        'grassland': 'Campos abiertos con abundante hierba y pocos árboles.',
+        'mountain': 'Áreas de gran altitud con terreno rocoso y vegetación escasa.',
+        'rare': 'Ubicaciones poco comunes que son difíciles de acceder.',
+        'rough-terrain': 'Paisajes accidentados con terreno irregular y obstáculos.',
+        'sea': 'Entornos oceánicos con agua salada.',
+        'urban': 'Ciudades y pueblos construidos por humanos.',
+        'waters-edge': 'Áreas donde la tierra se encuentra con el agua, como playas y riberas.',
+        'unknown': 'El hábitat de este Pokémon no está bien documentado.'
+    };
+    
+    // Map habitat names to Spanish names
+    const habitatNamesSpanish = {
+        'cave': 'Cueva',
+        'forest': 'Bosque',
+        'grassland': 'Pradera',
+        'mountain': 'Montaña',
+        'rare': 'Raro',
+        'rough-terrain': 'Terreno Accidentado',
+        'sea': 'Mar',
+        'urban': 'Urbano',
+        'waters-edge': 'Orilla del Agua',
+        'unknown': 'Desconocido'
+    };
+    
+    const habitatDescription = habitatDescriptions[habitatName] || 'Los detalles específicos de este hábitat no están bien documentados.';
+    const habitatNameSpanish = habitatNamesSpanish[habitatName] || capitalizeFirstLetter(habitatName);
+    
+    // Create the habitat info HTML
+    habitatContainer.innerHTML = `
+        <div class="habitat-info">
+            <div>
+                <h4 class="habitat-name">Hábitat: ${habitatNameSpanish}</h4>
+                <p class="habitat-description">${habitatDescription}</p>
+            </div>
+            <div class="habitat-map">
+                <div class="map-container" id="mapContainer">
+                    <!-- Map regions will be added here -->
+                </div>
+            </div>
+            <div class="location-list" id="locationList">
+                <div class="loading-locations">Cargando datos de localización...</div>
+            </div>
+        </div>
+    `;
+    
+    // Create the interactive map
+    createHabitatMap(habitatName);
+}
+
+// Function to create the interactive habitat map
+function createHabitatMap(habitatName) {
+    const mapContainer = document.getElementById('mapContainer');
+    
+    // Clear previous map
+    mapContainer.innerHTML = '';
+    
+    // Set background image based on habitat
+    const mapBackgrounds = {
+        'cave': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/cave-key.png)',
+        'forest': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/miracle-seed.png)',
+        'grassland': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/meadow-plate.png)',
+        'mountain': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hard-stone.png)',
+        'rare': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/comet-shard.png)',
+        'rough-terrain': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/stone-plate.png)',
+        'sea': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mystic-water.png)',
+        'urban': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/metal-coat.png)',
+        'waters-edge': 'url(https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/wave-incense.png)'
+    };
+    
+    // Set a background color based on habitat
+    const habitatColors = {
+        'cave': '#4a4a4a',
+        'forest': '#2e7d32',
+        'grassland': '#7cb342',
+        'mountain': '#795548',
+        'rare': '#9c27b0',
+        'rough-terrain': '#8d6e63',
+        'sea': '#1976d2',
+        'urban': '#616161',
+        'waters-edge': '#0097a7'
+    };
+    
+    const mapColor = habitatColors[habitatName] || '#37474f';
+    
+    // Set the map background
+    mapContainer.style.backgroundColor = mapColor;
+    mapContainer.style.backgroundImage = mapBackgrounds[habitatName] || 'none';
+    mapContainer.style.backgroundSize = '64px';
+    mapContainer.style.backgroundPosition = 'center';
+    mapContainer.style.backgroundRepeat = 'no-repeat';
+    
+    // Define regions based on the Pokémon games
+    const regions = [
+        { name: 'Kanto', x: 10, y: 10, width: 60, height: 40 },
+        { name: 'Johto', x: 80, y: 10, width: 60, height: 40 },
+        { name: 'Hoenn', x: 150, y: 10, width: 60, height: 40 },
+        { name: 'Sinnoh', x: 220, y: 10, width: 60, height: 40 },
+        { name: 'Unova', x: 10, y: 60, width: 60, height: 40 },
+        { name: 'Kalos', x: 80, y: 60, width: 60, height: 40 },
+        { name: 'Alola', x: 150, y: 60, width: 60, height: 40 },
+        { name: 'Galar', x: 220, y: 60, width: 60, height: 40 }
+    ];
+    
+    // Add regions to the map
+    regions.forEach(region => {
+        const regionElement = document.createElement('div');
+        regionElement.className = 'map-region';
+        regionElement.dataset.region = region.name;
+        regionElement.style.left = `${region.x}px`;
+        regionElement.style.top = `${region.y}px`;
+        regionElement.style.width = `${region.width}px`;
+        regionElement.style.height = `${region.height}px`;
+        
+        const tooltipElement = document.createElement('div');
+        tooltipElement.className = 'map-tooltip';
+        tooltipElement.textContent = region.name;
+        tooltipElement.style.left = `${region.x + region.width / 2}px`;
+        tooltipElement.style.top = `${region.y - 20}px`;
+        
+        mapContainer.appendChild(regionElement);
+        mapContainer.appendChild(tooltipElement);
+        
+        // Add click event to filter locations by region
+        regionElement.addEventListener('click', () => {
+            // Toggle active class
+            document.querySelectorAll('.map-region').forEach(el => el.classList.remove('active'));
+            regionElement.classList.add('active');
+            
+            // Filter locations by region
+            filterLocationsByRegion(region.name);
+        });
+    });
+}
+
+async function fetchPokemonLocations(pokemonId) {
+    try {
+        const locationResponse = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}/encounters`);
+        const locationData = await locationResponse.json();
+        
+        displayLocationData(locationData);
+    } catch (error) {
+        console.error('Error fetching location data:', error);
+        document.getElementById('locationList').innerHTML = `
+            <div class="location-item">
+                No specific location data available.
+            </div>
+        `;
+    }
+}
+
+// Function to display location data
+function displayLocationData(locationData) {
+    const locationList = document.getElementById('locationList');
+    
+    if (!locationData || locationData.length === 0) {
+        locationList.innerHTML = `
+            <div class="location-item">
+                No specific location data available for this Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    // Group locations by region
+    const locationsByRegion = {};
+    
+    locationData.forEach(location => {
+        // Extract region from location area
+        const locationName = location.location_area.name.replace(/-/g, ' ');
+        const regionName = getRegionFromLocation(locationName);
+        
+        if (!locationsByRegion[regionName]) {
+            locationsByRegion[regionName] = [];
+        }
+        
+        // Get encounter details
+        const encounterDetails = location.version_details.map(version => {
+            return {
+                version: version.version.name,
+                maxChance: version.max_chance,
+                encounterDetails: version.encounter_details.map(detail => ({
+                    method: detail.method.name,
+                    chance: detail.chance,
+                    minLevel: detail.min_level,
+                    maxLevel: detail.max_level
+                }))
+            };
+        });
+        
+        locationsByRegion[regionName].push({
+            name: locationName,
+            encounterDetails: encounterDetails
+        });
+    });
+    
+    // Store the location data for filtering
+    window.pokemonLocationData = locationsByRegion;
+    
+    // Display all locations initially
+    displayAllLocations();
+}
+
+// Function to display all locations
+function displayAllLocations() {
+    const locationList = document.getElementById('locationList');
+    const locationData = window.pokemonLocationData;
+    
+    if (!locationData || Object.keys(locationData).length === 0) {
+        locationList.innerHTML = `
+            <div class="location-item">
+                No specific location data available for this Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    let locationsHTML = '';
+    
+    // Loop through each region
+    for (const region in locationData) {
+        const locations = locationData[region];
+        
+        locationsHTML += `
+            <div class="region-header">${region}</div>
+        `;
+        
+        // Loop through each location in the region
+        locations.forEach(location => {
+            // Calculate average encounter rate
+            let totalChance = 0;
+            let versionCount = 0;
+            
+            location.encounterDetails.forEach(version => {
+                totalChance += version.maxChance;
+                versionCount++;
+            });
+            
+            const averageRate = versionCount > 0 ? Math.round(totalChance / versionCount) : 'Unknown';
+            const rateDisplay = averageRate !== 'Unknown' ? `${averageRate}%` : averageRate;
+            
+            locationsHTML += `
+                <div class="location-item">
+                    <span class="location-name">${capitalizeFirstLetter(location.name)}</span>
+                    <span class="location-rate">Encounter rate: ${rateDisplay}</span>
+                </div>
+            `;
+        });
+    }
+    
+    locationList.innerHTML = locationsHTML;
+}
+
+// Function to filter locations by region
+function filterLocationsByRegion(regionName) {
+    const locationList = document.getElementById('locationList');
+    const locationData = window.pokemonLocationData;
+    
+    if (!locationData) {
+        return;
+    }
+    
+    // If "All" is selected, show all locations
+    if (regionName === 'All') {
+        displayAllLocations();
+        return;
+    }
+    
+    // Filter locations for the selected region
+    const filteredLocations = locationData[regionName] || [];
+    
+    if (filteredLocations.length === 0) {
+        locationList.innerHTML = `
+            <div class="location-item">
+                No locations found in ${regionName} for this Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    let locationsHTML = '';
+    
+    // Loop through each location in the region
+    filteredLocations.forEach(location => {
+        // Calculate average encounter rate
+        let totalChance = 0;
+        let versionCount = 0;
+        
+        location.encounterDetails.forEach(version => {
+            totalChance += version.maxChance;
+            versionCount++;
+        });
+        
+        const averageRate = versionCount > 0 ? Math.round(totalChance / versionCount) : 'Unknown';
+        const rateDisplay = averageRate !== 'Unknown' ? `${averageRate}%` : averageRate;
+        
+        locationsHTML += `
+            <div class="location-item">
+                <span class="location-name">${capitalizeFirstLetter(location.name)}</span>
+                <span class="location-rate">Encounter rate: ${rateDisplay}</span>
+            </div>
+        `;
+    });
+    
+    locationList.innerHTML = locationsHTML;
+}
+
+// Helper function to get region from location name
+function getRegionFromLocation(locationName) {
+    // Map location prefixes to regions
+    const regionMappings = {
+        'kanto': 'Kanto',
+        'johto': 'Johto',
+        'hoenn': 'Hoenn',
+        'sinnoh': 'Sinnoh',
+        'unova': 'Unova',
+        'kalos': 'Kalos',
+        'alola': 'Alola',
+        'galar': 'Galar'
+    };
+    
+    // Check if the location name contains any region prefix
+    for (const prefix in regionMappings) {
+        if (locationName.toLowerCase().includes(prefix)) {
+            return regionMappings[prefix];
+        }
+    }
+    
+    // Try to determine region from game versions
+    if (locationName.includes('red') || locationName.includes('blue') || locationName.includes('yellow')) {
+        return 'Kanto';
+    } else if (locationName.includes('gold') || locationName.includes('silver') || locationName.includes('crystal')) {
+        return 'Johto';
+    } else if (locationName.includes('ruby') || locationName.includes('sapphire') || locationName.includes('emerald')) {
+        return 'Hoenn';
+    } else if (locationName.includes('diamond') || locationName.includes('pearl') || locationName.includes('platinum')) {
+        return 'Sinnoh';
+    } else if (locationName.includes('black') || locationName.includes('white')) {
+        return 'Unova';
+    } else if (locationName.includes('x') || locationName.includes('y')) {
+        return 'Kalos';
+    } else if (locationName.includes('sun') || locationName.includes('moon')) {
+        return 'Alola';
+    } else if (locationName.includes('sword') || locationName.includes('shield')) {
+        return 'Galar';
+    }
+    
+    // Default to "Other" if region can't be determined
+    return 'Other';
+}
+
+function capitalizeFirstLetter(string) {
+    return string.split(' ').map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+    }).join(' ');
+}
+
+function showPokemonDetails(pokemon) {
+    const pokemonDetails = document.getElementById('pokemon-details');
+    
+    // Create enhanced type badges with icons
+    const types = pokemon.types.map(type => {
+        const typeName = type.type.name;
+        return `
+            <span class="type-badge ${typeName}" style="background-color: ${typeColors[typeName]}">
+                <img class="type-icon" src="https://raw.githubusercontent.com/duiker101/pokemon-type-svg-icons/master/icons/${typeName}.svg" 
+                     alt="${typeName}" onerror="handleTypeIconError(this)">
+                ${typeName}
+            </span>
+        `;
+    }).join('');
+
+    // Create enhanced stats display with progress bars
+    const stats = pokemon.stats.map(stat => {
+        const statTranslations = {
+            'hp': 'PS',
+            'attack': 'Ataque',
+            'defense': 'Defensa',
+            'special-attack': 'Ataque Especial',
+            'special-defense': 'Defensa Especial',
+            'speed': 'Velocidad'
+        };
+        
+        const statName = statTranslations[stat.stat.name] || stat.stat.name;
+        const statValue = stat.base_stat;
+        
+        // Calculate percentage for progress bar (max stat value is typically 255)
+        const percentage = Math.min(100, Math.round((statValue / 255) * 100));
+        
+        // Determine color based on stat value
+        let statColor;
+        if (statValue < 50) statColor = '#f34444';
+        else if (statValue < 90) statColor = '#ff7f0f';
+        else if (statValue < 120) statColor = '#ffdd57';
+        else if (statValue < 150) statColor = '#a0e515';
+        else statColor = '#23cd5e';
+        
+        return `<div class="stat-item">
+            <strong>${statName}:</strong>
+            <div class="stat-value">${statValue}</div>
+            <div class="stat-bar-container">
+                <div class="stat-bar" style="width: ${percentage}%; background-color: ${statColor}"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Add height and weight to the stats section with improved styling
+    const heightValue = (pokemon.height/10).toFixed(1);
+    const weightValue = (pokemon.weight/10).toFixed(1);
+    
+    // Calculate relative height and weight percentages for visual bars
+    // Average height is around 1.5m, max around 20m
+    const heightPercentage = Math.min(100, Math.round((heightValue / 4) * 100));
+    // Average weight is around 60kg, max around 1000kg
+    const weightPercentage = Math.min(100, Math.round((weightValue / 200) * 100));
+    
+    const physicalStats = `
+        <div class="stat-item physical-stat">
+            <strong>Altura:</strong>
+            <div class="stat-value">${heightValue} m</div>
+            <div class="stat-bar-container">
+                <div class="stat-bar physical-bar" style="width: ${heightPercentage}%; background-color: #3498db"></div>
+            </div>
+        </div>
+        <div class="stat-item physical-stat">
+            <strong>Peso:</strong>
+            <div class="stat-value">${weightValue} kg</div>
+            <div class="stat-bar-container">
+                <div class="stat-bar physical-bar" style="width: ${weightPercentage}%; background-color: #9b59b6"></div>
+            </div>
+        </div>
+    `;
+
+    const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
+    const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
+
+    pokemonDetails.innerHTML = `
+        <div class="pokemon-info-screen">
+            <h2 class="pokemon-name">${pokemon.name}</h2>
+            <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
+            <div class="pokemon-types">${types}</div>
+            <div class="stats-container">
+                ${stats}
+                ${physicalStats}
+            </div>
+            
+            <div class="evolution-chain-container">
+                <h3>Cadena de Evolución</h3>
+                <div id="evolutionChain" class="evolution-chain">
+                    <div class="loading-evolution">Cargando datos de la cadena de evolución...</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Update sprite after modal is displayed
+    const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
+    spriteImg.src = primarySpriteUrl;
+    spriteImg.onerror = function() {
+        this.onerror = null;
+        this.src = fallbackSpriteUrl;
+    };
+
+    modal.style.display = 'block';
+    modalContent.classList.add('show');
+    
+    // Fetch and display evolution chain
+    fetchEvolutionChain(pokemon.id);
+}
+
+function createRegionFilter(locationData) {
+    // Get all available regions
+    const regions = Object.keys(locationData);
+    
+    if (regions.length <= 1) {
+        return; // Don't create filter if there's only one region
+    }
+    
+    // Create filter container
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'region-filter';
+    
+    // Add "All" button
+    const allButton = document.createElement('button');
+    allButton.className = 'region-filter-btn active';
+    allButton.textContent = 'Todas las Regiones';
+    allButton.addEventListener('click', () => {
+        // Remove active class from all buttons
+        document.querySelectorAll('.region-filter-btn').forEach(btn => btn.classList.remove('active'));
+        allButton.classList.add('active');
+        
+        // Show all locations
+        displayAllLocations();
+        
+        // Reset map regions
+        document.querySelectorAll('.map-region').forEach(region => region.classList.remove('active'));
+    });
+    
+    filterContainer.appendChild(allButton);
+    
+    // Add a button for each region
+    regions.forEach(region => {
+        const regionButton = document.createElement('button');
+        regionButton.className = 'region-filter-btn';
+        regionButton.textContent = region;
+        regionButton.addEventListener('click', () => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.region-filter-btn').forEach(btn => btn.classList.remove('active'));
+            regionButton.classList.add('active');
+            
+            // Filter locations by region
+            filterLocationsByRegion(region);
+            
+            // Highlight the corresponding map region
+            document.querySelectorAll('.map-region').forEach(el => {
+                if (el.dataset.region === region) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        });
+        
+        filterContainer.appendChild(regionButton);
+    });
+    
+    // Insert the filter before the location list
+    const locationList = document.getElementById('locationList');
+    locationList.parentNode.insertBefore(filterContainer, locationList);
+}
+
+function displayLocationData(locationData) {
+    const locationList = document.getElementById('locationList');
+    
+    if (!locationData || locationData.length === 0) {
+        locationList.innerHTML = `
+            <div class="location-item">
+                No specific location data available for this Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    // Group locations by region
+    const locationsByRegion = {};
+    
+    locationData.forEach(location => {
+        // Extract region from location area
+        const locationName = location.location_area.name.replace(/-/g, ' ');
+        const regionName = getRegionFromLocation(locationName);
+        
+        if (!locationsByRegion[regionName]) {
+            locationsByRegion[regionName] = [];
+        }
+        
+        // Get encounter details
+        const encounterDetails = location.version_details.map(version => {
+            return {
+                version: version.version.name,
+                maxChance: version.max_chance,
+                encounterDetails: version.encounter_details.map(detail => ({
+                    method: detail.method.name,
+                    chance: detail.chance,
+                    minLevel: detail.min_level,
+                    maxLevel: detail.max_level
+                }))
+            };
+        });
+        
+        locationsByRegion[regionName].push({
+            name: locationName,
+            encounterDetails: encounterDetails
+        });
+    });
+    
+    // Store the location data for filtering
+    window.pokemonLocationData = locationsByRegion;
+    
+    // Create region filter buttons
+    createRegionFilter(locationsByRegion);
+    
+    // Display all locations initially
+    displayAllLocations();
+    
+    // Add a legend to the map
+    addMapLegend();
+}
+
+function displayAllLocations() {
+    const locationList = document.getElementById('locationList');
+    const locationData = window.pokemonLocationData;
+    
+    if (!locationData || Object.keys(locationData).length === 0) {
+        locationList.innerHTML = `
+            <div class="location-item">
+                No hay datos de localización específicos disponibles para este Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    let locationsHTML = '';
+    
+    // Loop through each region
+    for (const region in locationData) {
+        const locations = locationData[region];
+        
+        locationsHTML += `
+            <div class="region-header">${region}</div>
+        `;
+        
+        // Loop through each location in the region
+        locations.forEach(location => {
+            // Calculate average encounter rate
+            let totalChance = 0;
+            let versionCount = 0;
+            
+            location.encounterDetails.forEach(version => {
+                totalChance += version.maxChance;
+                versionCount++;
+            });
+            
+            const averageRate = versionCount > 0 ? Math.round(totalChance / versionCount) : 'Desconocido';
+            const rateDisplay = averageRate !== 'Desconocido' ? `${averageRate}%` : averageRate;
+            
+            locationsHTML += `
+                <div class="location-item">
+                    <span class="location-name">${capitalizeFirstLetter(location.name)}</span>
+                    <span class="location-rate">Tasa de encuentro: ${rateDisplay}</span>
+                </div>
+            `;
+        });
+    }
+    
+    locationList.innerHTML = locationsHTML;
+}
+
+function addMapLegend() {
+    const mapContainer = document.getElementById('mapContainer');
+    
+    if (!mapContainer) return;
+    
+    const legend = document.createElement('div');
+    legend.className = 'map-legend';
+    legend.textContent = 'Haz clic en una región para filtrar ubicaciones';
+    
+    mapContainer.appendChild(legend);
+}
+
+function enhanceHabitatMap(habitatName) {
+    // Get the map container
+    const mapContainer = document.getElementById('mapContainer');
+    
+    if (!mapContainer) return;
+    
+    // Add a background image based on the habitat
+    const habitatImages = {
+        'cave': 'https://archives.bulbagarden.net/media/upload/thumb/4/48/ORAS_Cave_of_Origin_Entrance.png/300px-ORAS_Cave_of_Origin_Entrance.png',
+        'forest': 'https://archives.bulbagarden.net/media/upload/thumb/f/f6/Viridian_Forest_LGPE.png/300px-Viridian_Forest_LGPE.png',
+        'grassland': 'https://archives.bulbagarden.net/media/upload/thumb/d/d0/Route_1_SWSH.png/300px-Route_1_SWSH.png',
+        'mountain': 'https://archives.bulbagarden.net/media/upload/thumb/9/9d/Mt_Coronet_Summit_DPPt.png/300px-Mt_Coronet_Summit_DPPt.png',
+        'rare': 'https://archives.bulbagarden.net/media/upload/thumb/e/ec/Cerulean_Cave_1F_LGPE.png/300px-Cerulean_Cave_1F_LGPE.png',
+        'rough-terrain': 'https://archives.bulbagarden.net/media/upload/thumb/7/7a/Victory_Road_1F_ORAS.png/300px-Victory_Road_1F_ORAS.png',
+        'sea': 'https://archives.bulbagarden.net/media/upload/thumb/8/87/Sea_Mauville_ORAS.png/300px-Sea_Mauville_ORAS.png',
+        'urban': 'https://archives.bulbagarden.net/media/upload/thumb/0/09/Lumiose_City_XY.png/300px-Lumiose_City_XY.png',
+        'waters-edge': 'https://archives.bulbagarden.net/media/upload/thumb/b/b1/Undella_Town_Summer_B2W2.png/300px-Undella_Town_Summer_B2W2.png'
+    };
+    
+    const habitatImage = habitatImages[habitatName];
+    
+    if (habitatImage) {
+        // Create a background image element
+        const backgroundImg = document.createElement('img');
+        backgroundImg.src = habitatImage;
+        backgroundImg.className = 'habitat-background';
+        backgroundImg.style.position = 'absolute';
+        backgroundImg.style.top = '0';
+        backgroundImg.style.left = '0';
+        backgroundImg.style.width = '100%';
+        backgroundImg.style.height = '100%';
+        backgroundImg.style.objectFit = 'cover';
+        backgroundImg.style.opacity = '0.7';
+        backgroundImg.style.zIndex = '0';
+        
+        // Insert the background image as the first child
+        mapContainer.insertBefore(backgroundImg, mapContainer.firstChild);
+        
+        // Make sure map regions are above the background
+        document.querySelectorAll('.map-region').forEach(region => {
+            region.style.zIndex = '1';
+        });
+    }
+}
+
+function createHabitatMap(habitatName) {
+    const mapContainer = document.getElementById('mapContainer');
+    
+    // Clear previous map
+    mapContainer.innerHTML = '';
+    
+    // Set background color based on habitat
+    const habitatColors = {
+        'cave': '#4a4a4a',
+        'forest': '#2e7d32',
+        'grassland': '#7cb342',
+        'mountain': '#795548',
+        'rare': '#9c27b0',
+        'rough-terrain': '#8d6e63',
+        'sea': '#1976d2',
+        'urban': '#616161',
+        'waters-edge': '#0097a7'
+    };
+    
+    const mapColor = habitatColors[habitatName] || '#37474f';
+    
+    // Set the map background
+    mapContainer.style.backgroundColor = mapColor;
+    
+    // Define regions based on the Pokémon games
+    const regions = [
+        { name: 'Kanto', x: 10, y: 10, width: 60, height: 40 },
+        { name: 'Johto', x: 80, y: 10, width: 60, height: 40 },
+        { name: 'Hoenn', x: 150, y: 10, width: 60, height: 40 },
+        { name: 'Sinnoh', x: 220, y: 10, width: 60, height: 40 },
+        { name: 'Unova', x: 10, y: 60, width: 60, height: 40 },
+        { name: 'Kalos', x: 80, y: 60, width: 60, height: 40 },
+        { name: 'Alola', x: 150, y: 60, width: 60, height: 40 },
+        { name: 'Galar', x: 220, y: 60, width: 60, height: 40 }
+    ];
+    
+    // Add regions to the map
+    regions.forEach(region => {
+        const regionElement = document.createElement('div');
+        regionElement.className = 'map-region';
+        regionElement.dataset.region = region.name;
+        regionElement.style.left = `${region.x}px`;
+        regionElement.style.top = `${region.y}px`;
+        regionElement.style.width = `${region.width}px`;
+        regionElement.style.height = `${region.height}px`;
+        
+        const tooltipElement = document.createElement('div');
+        tooltipElement.className = 'map-tooltip';
+        tooltipElement.textContent = region.name;
+        tooltipElement.style.left = `${region.x + region.width / 2}px`;
+        tooltipElement.style.top = `${region.y - 20}px`;
+        
+        mapContainer.appendChild(regionElement);
+        mapContainer.appendChild(tooltipElement);
+        
+        // Add click event to filter locations by region
+        regionElement.addEventListener('click', () => {
+            // Toggle active class
+            document.querySelectorAll('.map-region').forEach(el => el.classList.remove('active'));
+            regionElement.classList.add('active');
+            
+            // Filter locations by region
+            filterLocationsByRegion(region.name);
+            
+            // Update region filter buttons if they exist
+            document.querySelectorAll('.region-filter-btn').forEach(btn => {
+                if (btn.textContent === region.name) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        });
+    });
+    
+    // Enhance the map with a background image
+    enhanceHabitatMap(habitatName);
+}
+
+function filterLocationsByRegion(regionName) {
+    const locationList = document.getElementById('locationList');
+    const locationData = window.pokemonLocationData;
+    
+    if (!locationData) {
+        return;
+    }
+    
+    // If "All" is selected, show all locations
+    if (regionName === 'Todas las Regiones') {
+        displayAllLocations();
+        return;
+    }
+    
+    // Filter locations for the selected region
+    const filteredLocations = locationData[regionName] || [];
+    
+    if (filteredLocations.length === 0) {
+        locationList.innerHTML = `
+            <div class="location-item">
+                No se encontraron ubicaciones en ${regionName} para este Pokémon.
+            </div>
+        `;
+        return;
+    }
+    
+    let locationsHTML = '';
+    
+    // Loop through each location in the region
+    filteredLocations.forEach(location => {
+        // Calculate average encounter rate
+        let totalChance = 0;
+        let versionCount = 0;
+        
+        location.encounterDetails.forEach(version => {
+            totalChance += version.maxChance;
+            versionCount++;
+        });
+        
+        const averageRate = versionCount > 0 ? Math.round(totalChance / versionCount) : 'Desconocido';
+        const rateDisplay = averageRate !== 'Desconocido' ? `${averageRate}%` : averageRate;
+        
+        locationsHTML += `
+            <div class="location-item">
+                <span class="location-name">${capitalizeFirstLetter(location.name)}</span>
+                <span class="location-rate">Tasa de encuentro: ${rateDisplay}</span>
+            </div>
+        `;
+    });
+    
+    locationList.innerHTML = locationsHTML;
 }
