@@ -15,45 +15,53 @@
 <body>
     <div class="pokedex-container">
         <header>
+            <button id="menuToggle" class="menu-toggle" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <h1>Pokédex</h1>
-            <div>
-                <button class="game-btn" id="whosThatPokemon">¿Quién es ese Pokémon?</button>
-            </div>
-            <div class="gen-filters">
-                <button class="gen-btn active" data-gen="1">Gen 1</button>
-                <button class="gen-btn" data-gen="2">Gen 2</button>
-                <button class="gen-btn" data-gen="3">Gen 3</button>
-                <button class="gen-btn" data-gen="4">Gen 4</button>
-                <button class="gen-btn" data-gen="5">Gen 5</button>
-                <button class="gen-btn" data-gen="6">Gen 6</button>
-                <button class="gen-btn" data-gen="7">Gen 7</button>
-                <button class="gen-btn" data-gen="8">Gen 8</button>
-                <button class="gen-btn" data-gen="9">Gen 9</button>
-            </div>
-
-            <div class="search-container">
-                <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
-                    <button id="filterToggle" class="filter-toggle" aria-label="Filtros">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="none" d="M0 0h24v24H0z" />
-                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor" />
-                        </svg>
-                    </button>
+            <nav id="mainNav" class="main-nav">
+                <div>
+                    <button class="game-btn" id="whosThatPokemon">¿Quién es ese Pokémon?</button>
+                </div>
+                <div class="gen-filters">
+                    <button class="gen-btn active" data-gen="1">Gen 1</button>
+                    <button class="gen-btn" data-gen="2">Gen 2</button>
+                    <button class="gen-btn" data-gen="3">Gen 3</button>
+                    <button class="gen-btn" data-gen="4">Gen 4</button>
+                    <button class="gen-btn" data-gen="5">Gen 5</button>
+                    <button class="gen-btn" data-gen="6">Gen 6</button>
+                    <button class="gen-btn" data-gen="7">Gen 7</button>
+                    <button class="gen-btn" data-gen="8">Gen 8</button>
+                    <button class="gen-btn" data-gen="9">Gen 9</button>
                 </div>
 
-                <div id="filterPanel" class="filter-panel">
-                    <h3>Filtrar por Tipo</h3>
-                    <div class="type-filters">
-                        <!-- Type filters will be added dynamically via JavaScript -->
+                <div class="search-container">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
+                        <button id="filterToggle" class="filter-toggle" aria-label="Filtros">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="none" d="M0 0h24v24H0z" />
+                                <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor" />
+                            </svg>
+                        </button>
                     </div>
-                    <div class="sort-options">
-                        <button class="sort-btn" data-sort="id">Ordenar por ID</button>
-                        <button class="sort-btn" data-sort="name">Ordenar por Nombre</button>
-                        <button class="sort-btn" data-sort="height">Ordenar por Altura</button>
-                        <button class="sort-btn" data-sort="weight">Ordenar por Peso</button>
+
+                    <div id="filterPanel" class="filter-panel">
+                        <h3>Filtrar por Tipo</h3>
+                        <div class="type-filters">
+                            <!-- Type filters will be added dynamically via JavaScript -->
+                        </div>
+                        <div class="sort-options">
+                            <button class="sort-btn" data-sort="id">Ordenar por ID</button>
+                            <button class="sort-btn" data-sort="name">Ordenar por Nombre</button>
+                            <button class="sort-btn" data-sort="height">Ordenar por Altura</button>
+                            <button class="sort-btn" data-sort="weight">Ordenar por Peso</button>
+                        </div>
                     </div>
                 </div>
+            </nav>
         </header>
         <main class="pokemon-grid">
             <div class="screen-reflection"></div>

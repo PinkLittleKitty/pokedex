@@ -377,6 +377,60 @@ document.addEventListener('DOMContentLoaded', () => {
     setupGameModes();
 
     document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
+
+    // Menu Toggle Logic
+    const menuToggle = document.getElementById('menuToggle');
+    const mainNav = document.getElementById('mainNav');
+
+    if (menuToggle && mainNav) {
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            mainNav.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!mainNav.contains(e.target) && !menuToggle.contains(e.target) && mainNav.classList.contains('active')) {
+                menuToggle.classList.remove('active');
+                mainNav.classList.remove('active');
+            }
+        });
+
+        // Close menu when a link/button is clicked inside it
+        mainNav.querySelectorAll('button').forEach(btn => {
+            if (btn.id !== 'filterToggle') {
+                btn.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        menuToggle.classList.remove('active');
+                        mainNav.classList.remove('active');
+                    }
+                });
+            }
+        });
+    }
+
+    // Modal Scroll Locking helper
+    const toggleModalScrollLock = (isOpen) => {
+        if (isOpen) {
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+        }
+    };
+
+    // Observer for modal style changes
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style') {
+                const isVisible = mutation.target.style.display === 'block';
+                toggleModalScrollLock(isVisible);
+            }
+        });
+    });
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+    });
 });
 document.querySelectorAll('.gen-btn').forEach(button => {
     button.addEventListener('click', (e) => {
