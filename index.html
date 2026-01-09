@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
     <meta name="theme-color" content="#dc0a2d">
     <link rel="icon" href="icon.png">
 </head>
+
 <body>
     <div class="pokedex-container">
         <header>
@@ -28,30 +30,30 @@
                 <button class="gen-btn" data-gen="8">Gen 8</button>
                 <button class="gen-btn" data-gen="9">Gen 9</button>
             </div>
-            
+
             <div class="search-container">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Buscar Pokémon...">
                     <button id="filterToggle" class="filter-toggle" aria-label="Filtros">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                            <path fill="none" d="M0 0h24v24H0z"/>
-                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/>
+                            <path fill="none" d="M0 0h24v24H0z" />
+                            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor" />
                         </svg>
                     </button>
                 </div>
-                
+
                 <div id="filterPanel" class="filter-panel">
                     <h3>Filtrar por Tipo</h3>
                     <div class="type-filters">
                         <!-- Type filters will be added dynamically via JavaScript -->
                     </div>
-                <div class="sort-options">
-                    <button class="sort-btn" data-sort="id">Ordenar por ID</button>
-                    <button class="sort-btn" data-sort="name">Ordenar por Nombre</button>
-                    <button class="sort-btn" data-sort="height">Ordenar por Altura</button>
-                    <button class="sort-btn" data-sort="weight">Ordenar por Peso</button>
+                    <div class="sort-options">
+                        <button class="sort-btn" data-sort="id">Ordenar por ID</button>
+                        <button class="sort-btn" data-sort="name">Ordenar por Nombre</button>
+                        <button class="sort-btn" data-sort="height">Ordenar por Altura</button>
+                        <button class="sort-btn" data-sort="weight">Ordenar por Peso</button>
+                    </div>
                 </div>
-            </div>
         </header>
         <main class="pokemon-grid">
             <div class="screen-reflection"></div>
@@ -74,21 +76,28 @@
                     <div id="pokemon-details" class="pokemon-details">
                         <!-- Pokemon info will be inserted here -->
                     </div>
+                    <audio id="pokemonCry" style="display:none;"></audio>
                 </div>
                 <span class="close">×</span>
             </div>
         </div>
-          <div id="gameModal" class="modal game-modal">
-              <div class="modal-content game-content">
-                  <span class="close" onclick="document.getElementById('gameModal').style.display='none'">×</span>
-                  <div class="game-screen">
-                      <img id="mysteryPokemon" class="pokemon-sprite silhouette" src="" alt="Who's that Pokemon?">
-                      <div id="answerOptions" class="answer-options"></div>
-                      <div id="gameScore" class="game-score">Puntuación: 0</div>
-                  </div>
-                  <div id="gameResult" class="game-result"></div>
-              </div>
-          </div>
+        <div id="gameModal" class="modal game-modal">
+            <div class="modal-content game-content">
+                <span class="close" onclick="document.getElementById('gameModal').style.display='none'">×</span>
+                <div class="game-controls">
+                    <span class="mode-label">Modo:</span>
+                    <button id="visualModeBtn" class="mode-btn active">Visual</button>
+                    <button id="audioModeBtn" class="mode-btn">Audio</button>
+                </div>
+                <div class="game-screen">
+                    <div id="audioPlaceholder" class="audio-placeholder" style="display: none;">🔊</div>
+                    <img id="mysteryPokemon" class="pokemon-sprite silhouette" src="" alt="Who's that Pokemon?">
+                    <div id="answerOptions" class="answer-options"></div>
+                    <div id="gameScore" class="game-score">Puntuación: 0</div>
+                </div>
+                <div id="gameResult" class="game-result"></div>
+            </div>
+        </div>
     </div>
     <div class="loading-indicator">
         <div class="loading-pokeball"></div>
@@ -104,4 +113,5 @@
     <script src="data/gen9.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
