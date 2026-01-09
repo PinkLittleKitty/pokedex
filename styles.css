@@ -2507,10 +2507,10 @@ header {
 .audio-placeholder {
     width: 200px;
     height: 200px;
-    display: flex;
+    display: flex !important;
+    /* Force flex for centering */
     align-items: center;
     justify-content: center;
-    font-size: 5rem;
     background: #222;
     border-radius: 50%;
     margin: 0 auto;
@@ -2524,8 +2524,55 @@ header {
     box-shadow: 0 0 15px rgba(133, 195, 233, 0.3);
 }
 
+.game-audio-icon {
+    font-size: 5rem;
+    color: white;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+    animation: pulseIcon 2s infinite;
+}
+
+@keyframes pulseIcon {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+}
+
+.audio-placeholder.playing .game-audio-icon {
+    animation: shakeIcon 0.5s ease-in-out infinite;
+    color: #4CAF50;
+    /* Green tint when playing */
+}
+
+@keyframes shakeIcon {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(10deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
 .audio-placeholder.playing {
-    animation: soundPulse 0.5s infinite;
     border-color: var(--glow-blue);
 }
 
@@ -2566,6 +2613,262 @@ header {
     .audio-placeholder {
         width: 120px;
         height: 120px;
-        font-size: 3rem;
+    }
+}
+/* Minigames Section */
+.nav-section {
+    margin: 1rem 0;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+}
+
+.nav-section h3 {
+    font-size: 1rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    text-align: center;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.game-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+/* Poképalabra Modal Styles */
+.pokepalabra-content {
+    background: #2a2a2a; /* Darker bg for game focus */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+}
+
+.game-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+}
+
+.game-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.timer {
+    color: var(--pokedex-red);
+    text-shadow: 0 0 5px rgba(220, 10, 45, 0.5);
+}
+
+.score {
+    color: var(--glow-blue);
+}
+
+.game-area {
+    position: relative;
+    width: 90vmin;
+    height: 90vmin;
+    max-width: 500px;
+    max-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.rosco-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.letter-circle {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    border: 2px solid white;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    /* Transformation logic handles position */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.letter-circle.active {
+    background: var(--glow-blue);
+    border-color: var(--glow-blue);
+    color: #000;
+    box-shadow: 0 0 15px var(--glow-blue);
+    transform: scale(1.2); /* Logic needs to handle this relative to rotation */
+    z-index: 10;
+}
+
+.letter-circle.correct {
+    background: #4caf50;
+    border-color: #4caf50;
+}
+
+.letter-circle.incorrect {
+    background: #f44336;
+    border-color: #f44336;
+}
+
+.central-circle {
+    width: 60%;
+    height: 60%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    text-align: center;
+    z-index: 5;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.letter-indicator {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--glow-blue);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.question-text {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    min-height: 2.4em; /* Reserve space for 2 lines */
+}
+
+#pokepalabraInput {
+    width: 80%;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    border: none;
+    text-align: center;
+    font-size: 1.1rem;
+    background: rgba(255,255,255,0.9);
+    color: black;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s;
+    flex: 1;
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+.action-btn.submit {
+    background: var(--pokedex-red);
+    color: white;
+}
+
+.action-btn.skip {
+    background: #555;
+    color: white;
+}
+
+.game-message {
+    height: 1.5rem;
+    margin-top: 0.5rem;
+    font-weight: bold;
+}
+
+.game-message.correct { color: #4caf50; }
+.game-message.wrong { color: #f44336; }
+
+.end-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    width: 80%;
+    max-width: 400px;
+    z-index: 20;
+    border: 2px solid var(--pokedex-red);
+}
+
+.end-screen h3 {
+    font-size: 2rem;
+    color: var(--pokedex-red);
+    margin-bottom: 1rem;
+}
+
+.end-screen p {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+}
+
+.restart-btn {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: var(--glow-blue);
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+}
+
+/* Mobile Adjustments for Rosco */
+@media (max-width: 480px) {
+    .letter-circle {
+        width: 25px;
+        height: 25px;
+        font-size: 0.7rem;
+    }
+    
+    .central-circle {
+        width: 70%;
+        height: 70%;
+    }
+    
+    .letter-indicator {
+        font-size: 2rem;
+    }
+    
+    #pokepalabraInput {
+        font-size: 1rem;
     }
 }
