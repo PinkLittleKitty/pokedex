@@ -579,10 +579,31 @@ function showNextPokemon() {
 
     const shuffledOptions = options.sort(() => Math.random() - 0.5);
 
+    mysteryPokemon.style.display = 'none';
+    mysteryPokemon.src = '';
+
+    let gameLoader = document.getElementById('gameLoader');
+    if (!gameLoader) {
+        gameLoader = document.createElement('div');
+        gameLoader.id = 'gameLoader';
+        gameLoader.className = 'loading-pokeball';
+        gameLoader.style.margin = '2rem auto';
+        document.querySelector('.game-screen').insertBefore(gameLoader, mysteryPokemon);
+    }
+    gameLoader.style.display = 'block';
+
+    mysteryPokemon.onload = () => {
+        gameLoader.style.display = 'none';
+        if (currentGameMode === 'visual') {
+            mysteryPokemon.style.display = 'block';
+        }
+    };
+
     mysteryPokemon.src = correctPokemon.sprites.other['official-artwork'].front_default;
 
     if (currentGameMode === 'audio') {
         playGameCry(correctPokemon);
+        gameLoader.style.display = 'none';
     }
 
     answerOptions.innerHTML = shuffledOptions.map(option => `
@@ -1283,6 +1304,17 @@ function capitalizeFirstLetter(string) {
 }
 
 function showPokemonDetails(pokemon) {
+    const modal = document.getElementById('modal');
+    const modalContent = modal.querySelector('.modal-content');
+
+    if (!modalContent.querySelector('.modal-logo')) {
+        const logoImg = document.createElement('img');
+        logoImg.src = 'icon.png';
+        logoImg.className = 'modal-logo';
+        logoImg.alt = 'Pokédex Logo';
+        modalContent.appendChild(logoImg);
+    }
+
     const pokemonDetails = document.getElementById('pokemon-details');
 
     const types = pokemon.types.map(type => {
@@ -1703,12 +1735,11 @@ function filterLocationsByRegion(regionName) {
 
     locationList.innerHTML = locationsHTML;
 }
-/* --- Poképalabra Logic --- */
 
 const pokepalabraState = {
     letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(''),
-    status: {}, // letter -> 'pending' | 'correct' | 'incorrect'
-    pendingLetters: [], 
+    status: {},
+    pendingLetters: [],
     currentLetter: '',
     score: 0,
     timer: 150,
@@ -1721,7 +1752,6 @@ async function startPokepalabra() {
         await fetchAllPokemon();
     }
 
-    // Initialize State
     pokepalabraState.letters.forEach(l => pokepalabraState.status[l] = 'pending');
     pokepalabraState.pendingLetters = [...pokepalabraState.letters];
     pokepalabraState.currentLetter = pokepalabraState.pendingLetters[0];
@@ -1729,17 +1759,15 @@ async function startPokepalabra() {
     pokepalabraState.timer = 150;
     pokepalabraState.isPlaying = true;
 
-    // Reset UI
     document.getElementById('pokepalabraModal').style.display = 'block';
     document.getElementById('pokepalabraEndScreen').style.display = 'none';
     document.getElementById('pokepalabraMessage').textContent = '';
     document.getElementById('pokepalabraMessage').className = 'game-message';
-    
+
     updatePokepalabraStats();
     renderRosco();
     updateCentralInterface();
-    
-    // Start Timer
+
     if (pokepalabraState.timerInterval) clearInterval(pokepalabraState.timerInterval);
     pokepalabraState.timerInterval = setInterval(() => {
         pokepalabraState.timer--;
@@ -1749,41 +1777,40 @@ async function startPokepalabra() {
         }
     }, 1000);
 
-    // Bind Controls
     document.getElementById('submitWordBtn').onclick = submitPokepalabraWord;
     document.getElementById('skipWordBtn').onclick = skipPokepalabraWord;
     document.getElementById('pokepalabraInput').onkeydown = (e) => {
         if (e.key === 'Enter') submitPokepalabraWord();
     };
     document.getElementById('restartPokepalabra').onclick = startPokepalabra; // Correctly re-bind
-    
+
     document.getElementById('pokepalabraInput').focus();
 }
 
 function renderRosco() {
     const container = document.getElementById('roscoContainer');
     container.innerHTML = '';
-    
+
     const radius = container.offsetWidth / 2 - 20; // 20px buffer
     const centerX = container.offsetWidth / 2;
     const centerY = container.offsetHeight / 2;
     const total = pokepalabraState.letters.length;
-    
+
     pokepalabraState.letters.forEach((letter, index) => {
         const angle = (index * (360 / total)) - 90; // Start at top (-90deg)
         const rad = angle * (Math.PI / 180);
-        
+
         const x = centerX + radius * Math.cos(rad);
         const y = centerY + radius * Math.sin(rad);
-        
+
         const el = document.createElement('div');
         el.className = `letter-circle ${pokepalabraState.status[letter]}`;
         if (letter === pokepalabraState.currentLetter) el.classList.add('active');
-        
+
         el.style.left = `${x - 17.5}px`; // Center the 35px circle
         el.style.top = `${y - 17.5}px`;
         el.textContent = letter;
-        
+
         container.appendChild(el);
     });
 }
@@ -1803,29 +1830,19 @@ function updatePokepalabraStats() {
 
 function submitPokepalabraWord() {
     if (!pokepalabraState.isPlaying) return;
-    
+
     const input = document.getElementById('pokepalabraInput').value.trim().toLowerCase();
     const currentLetter = pokepalabraState.currentLetter.toLowerCase();
-    
+
     if (!input) return;
-    
-    // Validation Logic
-    // 1. Starts with correct letter?
-    // Note: Some Nidoran names start with 'n', so logic handles normalized names mostly.
-    // We should simplify: Check if input starts with the letter.
-    // Exception: If letter is 'XYZ', might check 'Contains'? No, standard Pasapalabra is 'Empieza', unless specified 'Contiene'.
-    // For Pokemon, nearly all letters have starts. Maybe X/Y/Z are scarce depending on Generation.
-    // X: Xatu, Xerneas. Y: Yanma. Z: Zubat.
-    // So 'Starts with' is fine for all A-Z.
-    
+
     if (!input.startsWith(currentLetter)) {
         showMessage('¡Debe empezar por ' + currentLetter.toUpperCase() + '!', 'wrong');
         return;
     }
-    
-    // 2. Is it a Pokémon?
+
     const isValidPokemon = allPokemonData.some(p => p.name.toLowerCase() === input);
-    
+
     if (isValidPokemon) {
         pokepalabraState.status[pokepalabraState.currentLetter] = 'correct';
         pokepalabraState.score += 1;
@@ -1834,51 +1851,31 @@ function submitPokepalabraWord() {
         pokepalabraState.status[pokepalabraState.currentLetter] = 'incorrect';
         showMessage('¡Incorrecto! No es un Pokémon válido.', 'wrong');
     }
-    
+
     advanceTurn();
 }
 
 function skipPokepalabraWord() {
     if (!pokepalabraState.isPlaying) return;
-    // Leave status as pending, move letter to end of queue if desired, or just cycle.
-    // Standard Pasapalabra: Moves to next, comes back later.
-    // We iterate through 'letters'. We need a way to track the queue.
-    // Implementation: We look for the NEXT pending letter in the alphabet wrapper.
     showMessage('Pasapalabra', '');
     advanceTurn(true);
 }
 
 function advanceTurn(skipped = false) {
     if (!skipped) {
-        // If answered (right or wrong), remove from pending
         const idx = pokepalabraState.pendingLetters.indexOf(pokepalabraState.currentLetter);
         if (idx > -1) pokepalabraState.pendingLetters.splice(idx, 1);
-    } else {
-        // If skipped, move current to back of queue? 
-        // Or just search for next pending cyclically.
-        // Let's just rotate the pending list?
-        // Actually, we use 'pendingLetters' as the Queue.
-        // If skipped, we shift() and push().
-        // If answered, we shift().
-        // Wait, 'pendingLetters' order needs to be maintained A-Z for the first run?
-        // Pasapalabra goes A->B->...->Z -> A(pending)...
-        // So we just find the Next letter in the alphabetic list that is 'pending'.
     }
-    
-    // Logic to find next letter
-    // We need to know the current index in the FULL alphabet to find the next one.
     const fullIdx = pokepalabraState.letters.indexOf(pokepalabraState.currentLetter);
     let nextIdx = (fullIdx + 1) % pokepalabraState.letters.length;
-    
-    // Find next pending
+
     let loops = 0;
     while (pokepalabraState.status[pokepalabraState.letters[nextIdx]] !== 'pending' && loops < 26) {
         nextIdx = (nextIdx + 1) % pokepalabraState.letters.length;
         loops++;
     }
-    
+
     if (loops === 26) {
-        // No pending letters left
         endPokepalabra();
     } else {
         pokepalabraState.currentLetter = pokepalabraState.letters[nextIdx];
@@ -1900,16 +1897,15 @@ function showMessage(text, type) {
 function endPokepalabra() {
     pokepalabraState.isPlaying = false;
     clearInterval(pokepalabraState.timerInterval);
-    
+
     const correct = Object.values(pokepalabraState.status).filter(s => s === 'correct').length;
     const wrong = Object.values(pokepalabraState.status).filter(s => s === 'incorrect').length;
-    
+
     document.getElementById('finalCorrect').textContent = correct;
     document.getElementById('finalWrong').textContent = wrong;
     document.getElementById('pokepalabraEndScreen').style.display = 'block';
 }
 
-// Window resize handling for Rosco (optional but good)
 window.addEventListener('resize', () => {
     if (document.getElementById('pokepalabraModal').style.display === 'block') {
         renderRosco();

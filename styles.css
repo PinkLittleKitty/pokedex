@@ -2507,7 +2507,7 @@ header {
 .audio-placeholder {
     width: 200px;
     height: 200px;
-    display: flex !important;
+    display: flex;
     /* Force flex for centering */
     align-items: center;
     justify-content: center;
@@ -2615,6 +2615,7 @@ header {
         height: 120px;
     }
 }
+
 /* Minigames Section */
 .nav-section {
     margin: 1rem 0;
@@ -2633,6 +2634,7 @@ header {
     letter-spacing: 1px;
 }
 
+/* Game buttons */
 .game-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -2640,9 +2642,31 @@ header {
     justify-content: center;
 }
 
+.modal-logo {
+    position: absolute;
+    top: 1rem;
+    right: 3rem;
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .modal-logo {
+        width: 40px;
+        height: 40px;
+        top: 0.5rem;
+        right: 2.5rem;
+    }
+}
+
+
 /* Poképalabra Modal Styles */
 .pokepalabra-content {
-    background: #2a2a2a; /* Darker bg for game focus */
+    background: #2a2a2a;
+    /* Darker bg for game focus */
     color: white;
     display: flex;
     flex-direction: column;
@@ -2709,7 +2733,7 @@ header {
     font-size: 0.9rem;
     /* Transformation logic handles position */
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .letter-circle.active {
@@ -2717,7 +2741,8 @@ header {
     border-color: var(--glow-blue);
     color: #000;
     box-shadow: 0 0 15px var(--glow-blue);
-    transform: scale(1.2); /* Logic needs to handle this relative to rotation */
+    transform: scale(1.2);
+    /* Logic needs to handle this relative to rotation */
     z-index: 10;
 }
 
@@ -2744,7 +2769,7 @@ header {
     text-align: center;
     z-index: 5;
     backdrop-filter: blur(5px);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .letter-indicator {
@@ -2758,7 +2783,8 @@ header {
 .question-text {
     font-size: 1rem;
     margin-bottom: 1rem;
-    min-height: 2.4em; /* Reserve space for 2 lines */
+    min-height: 2.4em;
+    /* Reserve space for 2 lines */
 }
 
 #pokepalabraInput {
@@ -2769,7 +2795,7 @@ header {
     border: none;
     text-align: center;
     font-size: 1.1rem;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255, 255, 255, 0.9);
     color: black;
 }
 
@@ -2810,8 +2836,13 @@ header {
     font-weight: bold;
 }
 
-.game-message.correct { color: #4caf50; }
-.game-message.wrong { color: #f44336; }
+.game-message.correct {
+    color: #4caf50;
+}
+
+.game-message.wrong {
+    color: #f44336;
+}
 
 .end-screen {
     position: absolute;
@@ -2858,16 +2889,16 @@ header {
         height: 25px;
         font-size: 0.7rem;
     }
-    
+
     .central-circle {
         width: 70%;
         height: 70%;
     }
-    
+
     .letter-indicator {
         font-size: 2rem;
     }
-    
+
     #pokepalabraInput {
         font-size: 1rem;
     }
