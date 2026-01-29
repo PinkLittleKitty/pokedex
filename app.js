@@ -1790,7 +1790,7 @@ async function startPokepalabra() {
     document.getElementById('pokepalabraInput').onkeydown = (e) => {
         if (e.key === 'Enter') submitPokepalabraWord();
     };
-    document.getElementById('restartPokepalabra').onclick = startPokepalabra; // Correctly re-bind
+    document.getElementById('restartPokepalabra').onclick = startPokepalabra;
 
     document.getElementById('pokepalabraInput').focus();
 }
@@ -1799,13 +1799,13 @@ function renderRosco() {
     const container = document.getElementById('roscoContainer');
     container.innerHTML = '';
 
-    const radius = container.offsetWidth / 2 - 20; // 20px buffer
+    const radius = container.offsetWidth / 2 - 20;
     const centerX = container.offsetWidth / 2;
     const centerY = container.offsetHeight / 2;
     const total = pokepalabraState.letters.length;
 
     pokepalabraState.letters.forEach((letter, index) => {
-        const angle = (index * (360 / total)) - 90; // Start at top (-90deg)
+        const angle = (index * (360 / total)) - 90;
         const rad = angle * (Math.PI / 180);
 
         const x = centerX + radius * Math.cos(rad);
@@ -1815,7 +1815,7 @@ function renderRosco() {
         el.className = `letter-circle ${pokepalabraState.status[letter]}`;
         if (letter === pokepalabraState.currentLetter) el.classList.add('active');
 
-        el.style.left = `${x - 17.5}px`; // Center the 35px circle
+        el.style.left = `${x - 17.5}px`;
         el.style.top = `${y - 17.5}px`;
         el.textContent = letter;
 
@@ -1833,7 +1833,22 @@ function updateCentralInterface() {
 
 function updatePokepalabraStats() {
     document.getElementById('pokepalabraScore').textContent = pokepalabraState.score;
-    document.getElementById('pokepalabraTimer').textContent = pokepalabraState.timer;
+    const timerElement = document.getElementById('pokepalabraTimer');
+    timerElement.textContent = pokepalabraState.timer;
+
+    const circle = document.querySelector('.timer-ring__circle');
+    const radius = circle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
+
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    const offset = circumference - (pokepalabraState.timer / 150) * circumference;
+    circle.style.strokeDashoffset = offset;
+
+    if (pokepalabraState.timer <= 30) {
+        circle.style.stroke = '#f44336';
+    } else {
+        circle.style.stroke = 'var(--pokedex-red)';
+    }
 }
 
 function submitPokepalabraWord() {

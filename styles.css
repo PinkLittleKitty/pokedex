@@ -44,7 +44,6 @@ header {
     z-index: 100;
 }
 
-/* Main LED light - Absolute position relative to header */
 header::before {
     content: '';
     position: absolute;
@@ -59,7 +58,6 @@ header::before {
     z-index: 2;
 }
 
-/* Decorative small LEDs */
 header::after {
     content: '';
     position: absolute;
@@ -78,7 +76,6 @@ h1 {
     width: 100%;
 }
 
-/* Menu Toggle Button (Hamburger) */
 .menu-toggle {
     display: none;
     position: absolute;
@@ -113,7 +110,6 @@ h1 {
     position: relative;
 }
 
-/* Desktop styles */
 @media (min-width: 769px) {
     .menu-toggle {
         display: none;
@@ -127,7 +123,6 @@ h1 {
     }
 }
 
-/* Mobile styles for Hamburger Menu */
 @media (max-width: 768px) {
     header {
         padding: 0.5rem;
@@ -152,14 +147,12 @@ h1 {
 
     header::after {
         display: none;
-        /* Hide small LEDs on mobile to save space */
     }
 
     .menu-toggle {
         display: block;
     }
 
-    /* Hamburger Animation */
     .menu-toggle.active span:nth-child(1) {
         transform: rotate(-45deg) translate(-5px, 6px);
     }
@@ -174,7 +167,6 @@ h1 {
 
     .main-nav {
         display: none;
-        /* Hidden by default on mobile */
         position: absolute;
         top: 100%;
         left: 0;
@@ -505,7 +497,6 @@ h1 {
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* Firefox scrollbar */
 .pokemon-grid {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
@@ -523,9 +514,7 @@ h1 {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    /* Changed from space-between to allow natural flow */
     height: auto;
-    /* Allow height to grow with content */
     min-height: 200px;
     gap: 0.5rem;
 }
@@ -538,7 +527,6 @@ h1 {
 
 .pokemon-sprite {
     width: 80px;
-    /* Slightly smaller base size */
     height: 80px;
     object-fit: contain;
     margin: 0 auto;
@@ -562,12 +550,10 @@ h1 {
     text-align: center;
     white-space: normal;
     word-wrap: break-word;
-    /* Ensure long names break */
     padding: 0 0.2rem;
     font-size: 1rem;
     line-height: 1.2;
     flex-grow: 1;
-    /* Allow name to take available space */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -592,9 +578,7 @@ h1 {
     justify-content: center;
     gap: 0.4rem;
     margin-top: auto;
-    /* Push to bottom */
     flex-wrap: wrap;
-    /* Allow wrapping for many types */
 }
 
 .pokemon-card .type-badge {
@@ -771,10 +755,8 @@ h1 {
     backdrop-filter: blur(5px);
     -webkit-overflow-scrolling: touch;
     overflow-y: hidden;
-    /* Handle scrolling within active modal content */
 }
 
-/* Ensure body doesn't scroll when modal is open (handled by JS class) */
 body.modal-open {
     overflow: hidden;
     position: fixed;
@@ -792,17 +774,14 @@ body.modal-open {
     grid-template-columns: 1fr 1fr;
     position: relative;
     overflow: hidden;
-    /* Prevent body scroll, handle inner scroll */
     animation: openPokedex 0.5s ease-out;
 }
 
-/* Mobile Modal Layout */
 @media (max-width: 768px) {
     .modal-content {
         display: flex;
         flex-direction: column;
         overflow-y: auto;
-        /* Allow full vertical scrolling on mobile */
         -webkit-overflow-scrolling: touch;
     }
 
@@ -813,7 +792,6 @@ body.modal-open {
         border-right: none;
         border-bottom: 4px solid var(--pokedex-dark);
         flex-shrink: 0;
-        /* Keep top part fixed size if needed, but allow scroll */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -826,7 +804,6 @@ body.modal-open {
         height: auto;
         padding: 1rem;
         overflow-y: visible;
-        /* Content flows naturally */
         background: var(--pokedex-red);
     }
 
@@ -838,14 +815,12 @@ body.modal-open {
 
     .pokemon-info-screen {
         margin-bottom: 4rem;
-        /* Extra space at bottom for scrolling */
     }
 }
 
 @keyframes openPokedex {
     from {
         transform: scaleY(0);
-        /* Animate height for mobile feel */
         transform-origin: center;
     }
 
@@ -909,7 +884,6 @@ body.modal-open {
     align-items: center;
 }
 
-/* For the pokemon list sprites */
 .pokemon-card .pokemon-sprite {
     width: 96px;
     height: 96px;
@@ -918,7 +892,6 @@ body.modal-open {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
-/* For the pokedex modal screen sprite */
 .pokedex-screen .pokemon-sprite {
     width: 200px;
     height: 200px;
@@ -1027,10 +1000,8 @@ body.modal-open {
     grid-template-columns: 1fr;
     gap: 0.8rem;
     margin-bottom: 3rem;
-    /* Space for scrolling */
 }
 
-/* Close Button Mobile Optimization */
 .close {
     position: absolute;
     top: 15px;
@@ -1040,7 +1011,6 @@ body.modal-open {
     font-weight: bold;
     cursor: pointer;
     z-index: 1005;
-    /* Higher than everything else */
     background: rgba(0, 0, 0, 0.5);
     width: 44px;
     height: 44px;
@@ -1061,24 +1031,20 @@ body.modal-open {
     transform: rotate(90deg);
 }
 
-/* Mobile Modal Layout */
 @media (max-width: 768px) {
     .modal-content {
         display: flex;
         flex-direction: column;
         overflow-y: auto;
-        /* Allow full vertical scrolling on mobile */
         -webkit-overflow-scrolling: touch;
         padding-top: 0;
     }
 
     .close {
         position: fixed;
-        /* Fix to viewport on mobile */
         top: 15px;
         right: 15px;
         background: rgba(0, 0, 0, 0.7);
-        /* Darker background for visibility */
         backdrop-filter: blur(2px);
     }
 
@@ -1086,11 +1052,9 @@ body.modal-open {
         width: 100%;
         height: auto;
         padding: 0.8rem;
-        /* Reduced padding */
         border-right: none;
         border-bottom: 4px solid var(--pokedex-dark);
         flex-shrink: 0;
-        /* Keep top part fixed size if needed, but allow scroll */
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1102,50 +1066,39 @@ body.modal-open {
         width: 100%;
         height: auto;
         padding: 0.8rem;
-        /* Reduced padding */
         overflow-y: visible;
-        /* Content flows naturally */
         background: var(--pokedex-red);
     }
 
     .pokedex-screen {
         width: 220px;
-        /* Smaller screen width */
         height: 180px;
-        /* Smaller screen height */
         margin: 0.5rem auto;
     }
 
     .pokemon-sprite {
         max-width: 80%;
-        /* Ensure sprite fits */
         max-height: 80%;
     }
 
     .pokemon-info-screen {
         margin-bottom: 4rem;
-        /* Extra space at bottom for scrolling */
         border: 4px solid var(--pokedex-dark);
-        /* Thinner border */
         padding: 0.8rem;
     }
 
     .stats-container {
         padding: 0.8rem;
-        /* Reduce internal padding */
     }
 
-    /* Ensure stat items don't overflow */
     .stat-item {
         grid-template-columns: 80px 50px 1fr !important;
-        /* Increased value column width */
         gap: 0.5rem !important;
         font-size: 0.85rem;
     }
 
     .physical-stats {
         flex-direction: column;
-        /* Stack height/weight on very small screens */
         gap: 1rem;
         align-items: center;
     }
@@ -1282,7 +1235,6 @@ body.modal-open {
     animation: growBar 1s ease-out forwards;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .stat-item {
         grid-template-columns: minmax(100px, auto) 35px 1fr !important;
@@ -1686,7 +1638,6 @@ header {
     padding: 1rem;
 }
 
-/* Main evolution flow - horizontal layout */
 .evolution-chain {
     display: flex;
     align-items: center;
@@ -1694,7 +1645,6 @@ header {
     gap: 1rem;
     padding: 1rem 0;
     flex-wrap: wrap;
-    /* Allow wrapping on small screens */
 }
 
 .evolution-stage {
@@ -1725,11 +1675,9 @@ header {
     font-size: 1.2rem;
 }
 
-/* Fix arrows when wrapping */
 @media (max-width: 600px) {
     .evolution-arrow {
         transform: rotate(90deg);
-        /* Point down when wrapped vertically */
         margin: 0.5rem 0;
     }
 }
@@ -1778,7 +1726,6 @@ header {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Arrow styling */
 .evolution-arrow {
     display: flex;
     flex-direction: column;
@@ -1861,7 +1808,6 @@ header {
     position: relative;
 }
 
-/* Add connecting lines for branches */
 .evolution-branch-container::before {
     content: '';
     position: absolute;
@@ -1882,7 +1828,6 @@ header {
     background: rgba(216, 243, 220, 0.5);
 }
 
-/* For multiple branches, add a nicer visual */
 .evolution-branch-container:has(.evolution-branch:nth-child(n+2))::after {
     content: '';
     position: absolute;
@@ -1895,7 +1840,6 @@ header {
     transform: translateY(-50%);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .evolution-chain {
         padding: 1rem 0.5rem;
@@ -1941,7 +1885,6 @@ header {
     }
 }
 
-/* Pokémon Header with Sound Button */
 .pokemon-header {
     display: flex;
     align-items: center;
@@ -2039,7 +1982,6 @@ header {
     opacity: 1;
 }
 
-/* Sound button playing state */
 .sound-btn.playing {
     background: var(--glow-blue);
     color: white;
@@ -2106,8 +2048,6 @@ header {
         transform: translateX(5px);
     }
 }
-
-/* Habitat and Locations Styles */
 
 .region-header {
     background: rgba(0, 0, 0, 0.3);
@@ -2409,7 +2349,6 @@ header {
     padding: 2rem 1rem;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .habitat-map {
         height: 150px;
@@ -2440,7 +2379,6 @@ header {
     }
 }
 
-/* Sound Button Styles */
 .sound-btn {
     transition: transform 0.2s ease;
     z-index: 10;
@@ -2472,7 +2410,6 @@ header {
     }
 }
 
-/* Game Controls */
 .game-controls {
     display: flex;
     justify-content: center;
@@ -2503,12 +2440,10 @@ header {
     box-shadow: 0 0 10px rgba(133, 195, 233, 0.5);
 }
 
-/* Audio Placeholder */
 .audio-placeholder {
     width: 200px;
     height: 200px;
     display: flex;
-    /* Force flex for centering */
     align-items: center;
     justify-content: center;
     background: #222;
@@ -2551,7 +2486,6 @@ header {
 .audio-placeholder.playing .game-audio-icon {
     animation: shakeIcon 0.5s ease-in-out infinite;
     color: #4CAF50;
-    /* Green tint when playing */
 }
 
 @keyframes shakeIcon {
@@ -2576,7 +2510,6 @@ header {
     border-color: var(--glow-blue);
 }
 
-/* Game Modal Responsiveness */
 @media (max-width: 600px) {
     .game-content {
         padding: 1rem;
@@ -2616,7 +2549,6 @@ header {
     }
 }
 
-/* Minigames Section */
 .nav-section {
     margin: 1rem 0;
     width: 100%;
@@ -2634,7 +2566,6 @@ header {
     letter-spacing: 1px;
 }
 
-/* Game buttons */
 .game-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -2663,10 +2594,8 @@ header {
 }
 
 
-/* Poképalabra Modal Styles */
 .pokepalabra-content {
     background: #2a2a2a;
-    /* Darker bg for game focus */
     color: white;
     display: flex;
     flex-direction: column;
@@ -2690,13 +2619,11 @@ header {
     font-weight: bold;
 }
 
-.timer {
-    color: var(--pokedex-red);
-    text-shadow: 0 0 5px rgba(220, 10, 45, 0.5);
-}
+
 
 .score {
     color: var(--glow-blue);
+    font-size: 1.5rem;
 }
 
 .game-area {
@@ -2731,7 +2658,6 @@ header {
     align-items: center;
     font-weight: bold;
     font-size: 0.9rem;
-    /* Transformation logic handles position */
     transition: all 0.3s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
@@ -2742,7 +2668,6 @@ header {
     color: #000;
     box-shadow: 0 0 15px var(--glow-blue);
     transform: scale(1.2);
-    /* Logic needs to handle this relative to rotation */
     z-index: 10;
 }
 
@@ -2757,10 +2682,10 @@ header {
 }
 
 .central-circle {
-    width: 60%;
-    height: 60%;
+    width: 65%;
+    height: 65%;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -2770,6 +2695,57 @@ header {
     z-index: 5;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.timer-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.timer-ring-container {
+    position: absolute;
+    width: 82%;
+    height: 82%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 4;
+}
+
+.timer-ring__svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.timer-ring__circle {
+    transition: stroke-dashoffset 1s linear;
+    transform-origin: 50% 50%;
+    stroke: var(--pokedex-red);
+    stroke-width: 3px;
+    fill: transparent;
+    filter: drop-shadow(0 0 5px rgba(220, 10, 45, 0.5));
+}
+
+.timer {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--pokedex-red);
+    text-shadow: 0 0 10px rgba(220, 10, 45, 0.5);
+    z-index: 20;
+    margin-bottom: 0.5rem;
+    position: relative;
+    top: auto;
 }
 
 .letter-indicator {
@@ -2777,14 +2753,14 @@ header {
     font-weight: bold;
     color: var(--glow-blue);
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
+    margin-top: 2.5rem;
 }
 
 .question-text {
     font-size: 1rem;
     margin-bottom: 1rem;
     min-height: 2.4em;
-    /* Reserve space for 2 lines */
 }
 
 #pokepalabraInput {
@@ -2882,7 +2858,6 @@ header {
     cursor: pointer;
 }
 
-/* Mobile Adjustments for Rosco */
 @media (max-width: 480px) {
     .letter-circle {
         width: 25px;
