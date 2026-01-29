@@ -2763,6 +2763,7 @@ header {
     min-height: 2.4em;
 }
 
+#pokecedarioInput,
 #pokepalabraInput {
     width: 80%;
     padding: 0.5rem;

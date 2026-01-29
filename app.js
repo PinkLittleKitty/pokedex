@@ -183,6 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSearchInput();
 
     document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
+    document.getElementById('startPokecedario').addEventListener('click', startPokecedario);
+    document.getElementById('startPokepalabra').addEventListener('click', startPokepalabra);
 });
 
 function applyFilters() {
@@ -453,27 +455,24 @@ const loadingStyles = `
 
 async function fetchAllPokemon() {
     try {
-        if (isLoading) return;
-        isLoading = true;
-        showLoading();
+        if (allPokemonData.length > 0) return;
 
-        if (allPokemonData.length > 0) {
-            hideLoading();
-            isLoading = false;
-            return;
-        }
+        if (typeof gen1Data !== 'undefined') allPokemonData.push(...gen1Data);
+        if (typeof gen2Data !== 'undefined') allPokemonData.push(...gen2Data);
+        if (typeof gen3Data !== 'undefined') allPokemonData.push(...gen3Data);
+        if (typeof gen4Data !== 'undefined') allPokemonData.push(...gen4Data);
+        if (typeof gen5Data !== 'undefined') allPokemonData.push(...gen5Data);
+        if (typeof gen6Data !== 'undefined') allPokemonData.push(...gen6Data);
+        if (typeof gen7Data !== 'undefined') allPokemonData.push(...gen7Data);
+        if (typeof gen8Data !== 'undefined') allPokemonData.push(...gen8Data);
+        if (typeof gen9Data !== 'undefined') allPokemonData.push(...gen9Data);
 
-        for (let gen = 1; gen <= 9; gen++) {
-            const response = await fetch(`data/gen${gen}.json`);
-            const genData = await response.json();
-            allPokemonData.push(...genData);
+        if (allPokemonData.length === 0) {
+            console.error('No Pokemon data loaded from globals!');
         }
 
     } catch (error) {
         console.error('Error fetching Pokemon:', error);
-    } finally {
-        hideLoading();
-        isLoading = false;
     }
 }
 const styleSheet = document.createElement('style');
@@ -511,34 +510,7 @@ function setHighScore(score) {
     }
 }
 
-async function fetchAllPokemon() {
-    try {
-        if (isLoading) return;
-        isLoading = true;
-        showLoading();
-
-        if (allPokemonData.length > 0) {
-            hideLoading();
-            isLoading = false;
-            return;
-        }
-        allPokemonData.push(...gen1Data);
-        allPokemonData.push(...gen2Data);
-        allPokemonData.push(...gen3Data);
-        allPokemonData.push(...gen4Data);
-        allPokemonData.push(...gen5Data);
-        allPokemonData.push(...gen6Data);
-        allPokemonData.push(...gen7Data);
-        allPokemonData.push(...gen8Data);
-        allPokemonData.push(...gen9Data);
-
-    } catch (error) {
-        console.error('Error fetching Pokemon:', error);
-    } finally {
-        hideLoading();
-        isLoading = false;
-    }
-} async function startWhosThatPokemon() {
+async function startWhosThatPokemon() {
     if (allPokemonData.length === 0) {
         await fetchAllPokemon();
     }
@@ -1744,7 +1716,7 @@ function filterLocationsByRegion(regionName) {
     locationList.innerHTML = locationsHTML;
 }
 
-const pokepalabraState = {
+const pokecedarioState = {
     letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(''),
     status: {},
     pendingLetters: [],
@@ -1755,56 +1727,61 @@ const pokepalabraState = {
     isPlaying: false
 };
 
-async function startPokepalabra() {
+async function startPokecedario() {
     if (allPokemonData.length === 0) {
         await fetchAllPokemon();
     }
 
-    pokepalabraState.letters.forEach(l => pokepalabraState.status[l] = 'pending');
-    pokepalabraState.pendingLetters = [...pokepalabraState.letters];
-    pokepalabraState.currentLetter = pokepalabraState.pendingLetters[0];
-    pokepalabraState.score = 0;
-    pokepalabraState.timer = 150;
-    pokepalabraState.isPlaying = true;
+    pokecedarioState.letters.forEach(l => pokecedarioState.status[l] = 'pending');
+    pokecedarioState.pendingLetters = [...pokecedarioState.letters];
+    pokecedarioState.currentLetter = pokecedarioState.pendingLetters[0];
+    pokecedarioState.score = 0;
+    pokecedarioState.timer = 150;
+    pokecedarioState.isPlaying = true;
 
-    document.getElementById('pokepalabraModal').style.display = 'block';
-    document.getElementById('pokepalabraEndScreen').style.display = 'none';
-    document.getElementById('pokepalabraMessage').textContent = '';
-    document.getElementById('pokepalabraMessage').className = 'game-message';
+    document.getElementById('pokecedarioModal').style.display = 'block';
+    document.getElementById('pokecedarioEndScreen').style.display = 'none';
+    document.getElementById('pokecedarioMessage').textContent = '';
+    document.getElementById('pokecedarioMessage').className = 'game-message';
 
-    updatePokepalabraStats();
+    updatePokecedarioStats();
+    updatePokecedarioStats();
     renderRosco();
     updateCentralInterface();
+    updateCentralInterface();
 
-    if (pokepalabraState.timerInterval) clearInterval(pokepalabraState.timerInterval);
-    pokepalabraState.timerInterval = setInterval(() => {
-        pokepalabraState.timer--;
-        updatePokepalabraStats();
-        if (pokepalabraState.timer <= 0) {
-            endPokepalabra();
+    if (pokecedarioState.timerInterval) clearInterval(pokecedarioState.timerInterval);
+    pokecedarioState.timerInterval = setInterval(() => {
+        pokecedarioState.timer--;
+        updatePokecedarioStats();
+        if (pokecedarioState.timer <= 0) {
+            endPokecedario();
         }
     }, 1000);
 
-    document.getElementById('submitWordBtn').onclick = submitPokepalabraWord;
-    document.getElementById('skipWordBtn').onclick = skipPokepalabraWord;
-    document.getElementById('pokepalabraInput').onkeydown = (e) => {
-        if (e.key === 'Enter') submitPokepalabraWord();
+    document.getElementById('submitWordBtn').onclick = submitPokecedarioWord;
+    document.getElementById('skipWordBtn').onclick = skipPokecedarioWord;
+    document.getElementById('pokecedarioInput').onkeydown = (e) => {
+        if (e.key === 'Enter') submitPokecedarioWord();
     };
-    document.getElementById('restartPokepalabra').onclick = startPokepalabra;
+    document.getElementById('restartPokecedario').onclick = startPokecedario;
 
-    document.getElementById('pokepalabraInput').focus();
+    document.getElementById('pokecedarioInput').focus();
 }
 
-function renderRosco() {
-    const container = document.getElementById('roscoContainer');
+
+function renderRosco(containerId = 'roscoContainer', state = pokecedarioState) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
     container.innerHTML = '';
 
     const radius = container.offsetWidth / 2 - 20;
     const centerX = container.offsetWidth / 2;
     const centerY = container.offsetHeight / 2;
-    const total = pokepalabraState.letters.length;
+    const total = state.letters.length;
 
-    pokepalabraState.letters.forEach((letter, index) => {
+    state.letters.forEach((letter, index) => {
         const angle = (index * (360 / total)) - 90;
         const rad = angle * (Math.PI / 180);
 
@@ -1812,8 +1789,8 @@ function renderRosco() {
         const y = centerY + radius * Math.sin(rad);
 
         const el = document.createElement('div');
-        el.className = `letter-circle ${pokepalabraState.status[letter]}`;
-        if (letter === pokepalabraState.currentLetter) el.classList.add('active');
+        el.className = `letter-circle ${state.status[letter]}`;
+        if (letter === state.currentLetter) el.classList.add('active');
 
         el.style.left = `${x - 17.5}px`;
         el.style.top = `${y - 17.5}px`;
@@ -1824,38 +1801,38 @@ function renderRosco() {
 }
 
 function updateCentralInterface() {
-    document.getElementById('currentLetterIndicator').textContent = pokepalabraState.currentLetter;
-    document.getElementById('questionText').textContent = `Empieza por ${pokepalabraState.currentLetter}...`;
-    const input = document.getElementById('pokepalabraInput');
+    document.getElementById('currentLetterIndicator').textContent = pokecedarioState.currentLetter;
+    document.getElementById('questionText').textContent = `Empieza por ${pokecedarioState.currentLetter}...`;
+    const input = document.getElementById('pokecedarioInput');
     input.value = '';
     input.focus();
 }
 
-function updatePokepalabraStats() {
-    document.getElementById('pokepalabraScore').textContent = pokepalabraState.score;
-    const timerElement = document.getElementById('pokepalabraTimer');
-    timerElement.textContent = pokepalabraState.timer;
+function updatePokecedarioStats() {
+    document.getElementById('pokecedarioScore').textContent = pokecedarioState.score;
+    const timerElement = document.getElementById('pokecedarioTimer');
+    timerElement.textContent = pokecedarioState.timer;
 
     const circle = document.querySelector('.timer-ring__circle');
     const radius = circle.r.baseVal.value;
     const circumference = radius * 2 * Math.PI;
 
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
-    const offset = circumference - (pokepalabraState.timer / 150) * circumference;
+    const offset = circumference - (pokecedarioState.timer / 150) * circumference;
     circle.style.strokeDashoffset = offset;
 
-    if (pokepalabraState.timer <= 30) {
+    if (pokecedarioState.timer <= 30) {
         circle.style.stroke = '#f44336';
     } else {
         circle.style.stroke = 'var(--pokedex-red)';
     }
 }
 
-function submitPokepalabraWord() {
-    if (!pokepalabraState.isPlaying) return;
+function submitPokecedarioWord() {
+    if (!pokecedarioState.isPlaying) return;
 
-    const input = document.getElementById('pokepalabraInput').value.trim().toLowerCase();
-    const currentLetter = pokepalabraState.currentLetter.toLowerCase();
+    const input = document.getElementById('pokecedarioInput').value.trim().toLowerCase();
+    const currentLetter = pokecedarioState.currentLetter.toLowerCase();
 
     if (!input) return;
 
@@ -1882,24 +1859,250 @@ function submitPokepalabraWord() {
     });
 
     if (isValidPokemon) {
-        pokepalabraState.status[pokepalabraState.currentLetter] = 'correct';
-        pokepalabraState.score += 1;
+        pokecedarioState.status[pokecedarioState.currentLetter] = 'correct';
+        pokecedarioState.score += 1;
         showMessage('¡Correcto!', 'correct');
     } else {
-        pokepalabraState.status[pokepalabraState.currentLetter] = 'incorrect';
+        pokecedarioState.status[pokecedarioState.currentLetter] = 'incorrect';
         showMessage('¡Incorrecto! No es un Pokémon válido.', 'wrong');
     }
 
     advanceTurn();
 }
 
-function skipPokepalabraWord() {
-    if (!pokepalabraState.isPlaying) return;
+function skipPokecedarioWord() {
+    if (!pokecedarioState.isPlaying) return;
     showMessage('Pasapalabra', '');
     advanceTurn(true);
 }
 
 function advanceTurn(skipped = false) {
+    if (!skipped) {
+        const idx = pokecedarioState.pendingLetters.indexOf(pokecedarioState.currentLetter);
+        if (idx > -1) pokecedarioState.pendingLetters.splice(idx, 1);
+    }
+    const fullIdx = pokecedarioState.letters.indexOf(pokecedarioState.currentLetter);
+    let nextIdx = (fullIdx + 1) % pokecedarioState.letters.length;
+
+    let loops = 0;
+    while (pokecedarioState.status[pokecedarioState.letters[nextIdx]] !== 'pending' && loops < 26) {
+        nextIdx = (nextIdx + 1) % pokecedarioState.letters.length;
+        loops++;
+    }
+
+    if (loops === 26) {
+        endPokecedario();
+    } else {
+        pokecedarioState.currentLetter = pokecedarioState.letters[nextIdx];
+        pokecedarioState.currentLetter = pokecedarioState.letters[nextIdx];
+        renderRosco();
+        updateCentralInterface();
+        updateCentralInterface();
+    }
+}
+
+function showMessage(text, type) {
+    const msg = document.getElementById('pokecedarioMessage');
+    msg.textContent = text;
+    msg.className = 'game-message ' + type;
+    setTimeout(() => {
+        msg.textContent = '';
+        msg.className = 'game-message';
+    }, 1500);
+}
+
+function endPokecedario() {
+    pokecedarioState.isPlaying = false;
+    clearInterval(pokecedarioState.timerInterval);
+
+    const correct = Object.values(pokecedarioState.status).filter(s => s === 'correct').length;
+    const wrong = Object.values(pokecedarioState.status).filter(s => s === 'incorrect').length;
+
+    document.getElementById('finalCorrect').textContent = correct;
+    document.getElementById('finalWrong').textContent = wrong;
+    document.getElementById('pokecedarioEndScreen').style.display = 'block';
+}
+
+const pokepalabraState = {
+    letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(''),
+    status: {},
+    pendingLetters: [],
+    currentLetter: '',
+    score: 0,
+    timer: 150,
+    timerInterval: null,
+    isPlaying: false,
+    currentPokemon: null
+};
+
+async function startPokepalabra() {
+    if (allPokemonData.length === 0) {
+        await fetchAllPokemon();
+    }
+
+    pokepalabraState.letters.forEach(l => pokepalabraState.status[l] = 'pending');
+    pokepalabraState.pendingLetters = [...pokepalabraState.letters];
+    pokepalabraState.currentLetter = pokepalabraState.pendingLetters[0];
+    pokepalabraState.score = 0;
+    pokepalabraState.timer = 300;
+    pokepalabraState.isPlaying = true;
+
+    document.getElementById('pokepalabraModal').style.display = 'block';
+    document.getElementById('pokepalabraEndScreen').style.display = 'none';
+    document.getElementById('pokepalabraMessage').textContent = '';
+    document.getElementById('pokepalabraMessage').className = 'game-message';
+
+    updatePokepalabraStats();
+    renderRosco('roscoContainerPokepalabra', pokepalabraState);
+    nextPokepalabraTurn();
+
+    if (pokepalabraState.timerInterval) clearInterval(pokepalabraState.timerInterval);
+    pokepalabraState.timerInterval = setInterval(() => {
+        pokepalabraState.timer--;
+        updatePokepalabraStats();
+        if (pokepalabraState.timer <= 0) {
+            endPokepalabra();
+        }
+    }, 1000);
+
+    document.getElementById('submitPokepalabraBtn').onclick = submitPokepalabraWord;
+    document.getElementById('skipPokepalabraBtn').onclick = skipPokepalabraWord;
+    document.getElementById('pokepalabraInput').onkeydown = (e) => {
+        if (e.key === 'Enter') submitPokepalabraWord();
+    };
+    document.getElementById('restartPokepalabra').onclick = startPokepalabra;
+}
+
+async function nextPokepalabraTurn() {
+    if (!pokepalabraState.isPlaying) return;
+
+    renderRosco('roscoContainerPokepalabra', pokepalabraState);
+    document.getElementById('pokepalabraIndicator').textContent = `Empieza por ${pokepalabraState.currentLetter}...`;
+    document.getElementById('pokepalabraInput').value = '';
+    document.getElementById('pokepalabraQuestion').textContent = 'Cargando pista...';
+
+    const letter = pokepalabraState.currentLetter.toLowerCase();
+
+    let candidates = allPokemonData.filter(p => p.name.startsWith(letter));
+
+    if (candidates.length === 0) {
+        const candidatesFallback = allPokemonData.filter(p => p.name.includes(letter));
+        if (candidatesFallback.length > 0) {
+            document.getElementById('pokepalabraIndicator').textContent = `Contiene ${pokepalabraState.currentLetter}...`;
+            findValidPokemonForTurn(candidatesFallback);
+        } else {
+            pokepalabraState.status[pokepalabraState.currentLetter] = 'incorrect';
+            advancePokepalabraTurn();
+        }
+    } else {
+        findValidPokemonForTurn(candidates);
+    }
+}
+
+async function findValidPokemonForTurn(candidates) {
+    if (candidates.length === 0) {
+        document.getElementById('pokepalabraQuestion').textContent = 'No se encontraron Pokémon válidos para esta letra.';
+        setTimeout(() => {
+            pokepalabraState.status[pokepalabraState.currentLetter] = 'incorrect';
+            advancePokepalabraTurn();
+        }, 2000);
+        return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    const pokemon = candidates[randomIndex];
+
+    const remainingCandidates = [...candidates];
+    remainingCandidates.splice(randomIndex, 1);
+
+    try {
+        const speciesResponse = await fetch(pokemon.species.url);
+        const speciesData = await speciesResponse.json();
+
+        const entry = speciesData.flavor_text_entries.find(e => e.language.name === 'es');
+
+        if (!entry) {
+            console.log(`No Spanish description for ${pokemon.name}, retrying...`);
+            findValidPokemonForTurn(remainingCandidates);
+            return;
+        }
+
+        pokepalabraState.currentPokemon = pokemon;
+
+        let flavorText = entry.flavor_text;
+        flavorText = flavorText.replace(/[\n\f]/g, ' ');
+
+        const nameRegex = new RegExp(pokemon.name, 'gi');
+        flavorText = flavorText.replace(nameRegex, '???');
+
+        if (pokemon.name.includes('-')) {
+            const parts = pokemon.name.split('-');
+            parts.forEach(part => {
+                if (part.length > 2) {
+                    const partRegex = new RegExp(part, 'gi');
+                    flavorText = flavorText.replace(partRegex, '???');
+                }
+            });
+        }
+
+        document.getElementById('pokepalabraInput').focus();
+        document.getElementById('pokepalabraQuestion').textContent = flavorText;
+
+    } catch (e) {
+        console.error("Error checking pokemon:", e);
+        findValidPokemonForTurn(remainingCandidates);
+    }
+}
+
+function updatePokepalabraStats() {
+    document.getElementById('pokepalabraScore').textContent = pokepalabraState.score;
+    const timerElement = document.getElementById('pokepalabraTimer');
+    timerElement.textContent = pokepalabraState.timer;
+
+    const circle = document.querySelector('#pokepalabraModal .timer-ring__circle');
+    if (circle) {
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        const offset = circumference - (pokepalabraState.timer / 300) * circumference;
+        circle.style.strokeDashoffset = offset;
+
+        if (pokepalabraState.timer <= 30) {
+            circle.style.stroke = '#f44336';
+        } else {
+            circle.style.stroke = 'var(--pokedex-red)';
+        }
+    }
+}
+
+function submitPokepalabraWord() {
+    if (!pokepalabraState.isPlaying) return;
+
+    const input = document.getElementById('pokepalabraInput').value.trim();
+    if (!input) return;
+
+    if (normalizeName(input) === normalizeName(pokepalabraState.currentPokemon.name)) {
+        pokepalabraState.score++;
+        pokepalabraState.status[pokepalabraState.currentLetter] = 'correct';
+        showMessage('¡Correcto!', 'correct');
+    } else {
+        pokepalabraState.status[pokepalabraState.currentLetter] = 'incorrect';
+        showMessage(`Incorrecto. Era ${formatPokemonName(pokepalabraState.currentPokemon.name)}`, 'wrong');
+    }
+
+    setTimeout(() => {
+        advancePokepalabraTurn();
+    }, 1500);
+}
+
+function skipPokepalabraWord() {
+    if (!pokepalabraState.isPlaying) return;
+    showMessage('Pasapalabra', '');
+    advancePokepalabraTurn(true);
+}
+
+function advancePokepalabraTurn(skipped = false) {
     if (!skipped) {
         const idx = pokepalabraState.pendingLetters.indexOf(pokepalabraState.currentLetter);
         if (idx > -1) pokepalabraState.pendingLetters.splice(idx, 1);
@@ -1917,35 +2120,27 @@ function advanceTurn(skipped = false) {
         endPokepalabra();
     } else {
         pokepalabraState.currentLetter = pokepalabraState.letters[nextIdx];
-        renderRosco();
-        updateCentralInterface();
+        renderRosco('roscoContainerPokepalabra', pokepalabraState);
+        nextPokepalabraTurn();
     }
-}
-
-function showMessage(text, type) {
-    const msg = document.getElementById('pokepalabraMessage');
-    msg.textContent = text;
-    msg.className = 'game-message ' + type;
-    setTimeout(() => {
-        msg.textContent = '';
-        msg.className = 'game-message';
-    }, 1500);
 }
 
 function endPokepalabra() {
     pokepalabraState.isPlaying = false;
     clearInterval(pokepalabraState.timerInterval);
-
-    const correct = Object.values(pokepalabraState.status).filter(s => s === 'correct').length;
-    const wrong = Object.values(pokepalabraState.status).filter(s => s === 'incorrect').length;
-
-    document.getElementById('finalCorrect').textContent = correct;
-    document.getElementById('finalWrong').textContent = wrong;
+    document.getElementById('finalPokepalabraScore').textContent = pokepalabraState.score;
     document.getElementById('pokepalabraEndScreen').style.display = 'block';
 }
 
 window.addEventListener('resize', () => {
-    if (document.getElementById('pokepalabraModal').style.display === 'block') {
-        renderRosco();
+    if (document.getElementById('pokecedarioModal').style.display === 'block') {
+        if (document.getElementById('pokecedarioModal').style.display === 'block') {
+            renderRosco();
+        }
+        if (document.getElementById('pokepalabraModal').style.display === 'block') {
+            renderRosco('roscoContainerPokepalabra', pokepalabraState);
+        }
     }
 });
+
+
