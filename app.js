@@ -214,12 +214,22 @@ document.addEventListener('DOMContentLoaded', () => {
 function applyFilters() {
     let filteredPokemon = [...pokemonData];
 
-    const searchTerm = searchInput.value.toLowerCase();
+    const searchTerm = searchInput.value;
     if (searchTerm) {
-        filteredPokemon = filteredPokemon.filter(pokemon =>
-            pokemon.name.toLowerCase().includes(searchTerm) ||
-            pokemon.id.toString().includes(searchTerm)
-        );
+        const sourceData = allPokemonData.length > 0 ? allPokemonData : pokemonData;
+
+        const options = {
+            keys: ['name', { name: 'id', weight: 0.5 }],
+            threshold: 0.4,
+            distance: 100
+        };
+
+        const fuse = new Fuse(sourceData, options);
+
+        const results = fuse.search(searchTerm);
+        filteredPokemon = results.map(result => result.item);
+    } else {
+        filteredPokemon = [...pokemonData];
     }
 
     if (activeTypeFilters.length > 0) {
@@ -390,6 +400,10 @@ async function fetchPokemonByGen(gen) {
 function setupSearchInput() {
     searchInput.addEventListener('input', () => {
         applyFilters();
+    });
+
+    searchInput.addEventListener('focus', () => {
+        fetchAllPokemon();
     });
 }
 
