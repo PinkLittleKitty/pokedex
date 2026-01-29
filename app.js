@@ -31,9 +31,10 @@ const typeColors = {
     fairy: '#EE99AC'
 };
 
-function createPokemonCard(pokemon) {
+function createPokemonCard(pokemon, index = 0) {
     const card = document.createElement('div');
     card.classList.add('pokemon-card');
+    card.style.animationDelay = `${(index % 20) * 0.05}s`;
 
     const primarySpriteUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/pokemon-gen8/regular/${pokemon.name}.png`;
 
@@ -275,8 +276,8 @@ function applyFilters() {
 function displayFilteredPokemon(filteredPokemon) {
     pokemonGrid.innerHTML = '';
 
-    filteredPokemon.forEach(pokemon => {
-        createPokemonCard(pokemon);
+    filteredPokemon.forEach((pokemon, index) => {
+        createPokemonCard(pokemon, index);
     });
 
     if (filteredPokemon.length === 0) {
@@ -385,7 +386,7 @@ async function fetchPokemonByGen(gen) {
         });
         sortDirection = 'asc';
 
-        pokemonData.forEach(data => createPokemonCard(data));
+        pokemonData.forEach((data, index) => createPokemonCard(data, index));
 
         setupTypeFilters();
         setupSortButtons();
@@ -568,6 +569,7 @@ function showNextPokemon() {
     if (currentGameMode === 'visual') {
         mysteryPokemon.style.display = 'block';
         mysteryPokemon.classList.add('silhouette');
+        mysteryPokemon.classList.remove('revealed');
         document.getElementById('audioPlaceholder').style.display = 'none';
     } else {
         mysteryPokemon.style.display = 'none';
@@ -598,7 +600,8 @@ function showNextPokemon() {
         gameLoader.id = 'gameLoader';
         gameLoader.className = 'loading-pokeball';
         gameLoader.style.margin = '2rem auto';
-        document.querySelector('.game-screen').insertBefore(gameLoader, mysteryPokemon);
+        const gameDisplay = document.querySelector('.game-display') || document.querySelector('.pokedex-screen');
+        if (gameDisplay) gameDisplay.insertBefore(gameLoader, mysteryPokemon);
     }
     gameLoader.style.display = 'block';
 
@@ -626,15 +629,22 @@ function showNextPokemon() {
 }
 
 function updateScore() {
-    document.getElementById('gameScore').innerHTML = `
-        Puntuación: ${gameScore}<br>
-        Mejor Puntuación: ${highScore}
-    `;
+    const scoreElement = document.getElementById('gameScore');
+    if (scoreElement) {
+        scoreElement.innerHTML = `PUNTUACIÓN: ${gameScore} | MEJOR: ${highScore}`;
+    }
 }
 
 function checkAnswer(selected, correct) {
     const gameResult = document.getElementById('gameResult');
     const mysteryPokemon = document.getElementById('mysteryPokemon');
+
+    const audio = document.getElementById('pokemonCry');
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+
     const answerButtons = document.querySelectorAll('.answer-btn');
 
     if (currentGameMode === 'audio') {
@@ -647,6 +657,7 @@ function checkAnswer(selected, correct) {
     }
 
     mysteryPokemon.classList.remove('silhouette');
+    mysteryPokemon.classList.add('revealed');
     answerButtons.forEach(btn => btn.disabled = true);
 
     if (selected === correct) {
@@ -701,6 +712,8 @@ function setupGameModes() {
         currentGameMode = 'visual';
         visualBtn.classList.add('active');
         audioBtn.classList.remove('active');
+        visualBtn.style.boxShadow = '0 0 10px #3498db';
+        audioBtn.style.boxShadow = '0 4px 0 #217dbb';
         if (document.getElementById('gameModal').style.display === 'block') {
             gameScore = 0;
             updateScore();
@@ -787,18 +800,13 @@ function createEvolutionHTML(chain, level = 0) {
     const fallbackUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getPokemonIdFromUrl(pokemon.url)}.png`;
 
     let html = `
-        <div class="evolution-stage level-${level}">
-            ${level > 0 ? `
-                <div class="evolution-arrow">
-                    <span class="arrow-icon">→</span>
-                    <span class="evolution-detail">${evolutionDetails}</span>
-                </div>
-            ` : ''}
-            <div class="evolution-pokemon" data-name="${pokemonName}">
-                <img src="${spriteUrl}" alt="${pokemonName}" 
-                     onerror="this.onerror=null; this.src='${fallbackUrl}'">
-                <p class="evolution-name">${formatPokemonName(pokemonName)}</p>
+        <div class="evolution-stage level-${level}" style="display: flex; align-items: center; gap: 4px;">
+            ${level > 0 ? `<span style="font-size: 0.8rem; opacity: 0.5;">→</span>` : ''}
+            <div class="evolution-pokemon" data-name="${pokemonName}" style="text-align: center; cursor: pointer;">
+                <img src="${spriteUrl}" alt="${pokemonName}" class="evolution-img" style="width: 40px; height: 40px;" onerror="this.src='${fallbackUrl}'">
+                <div class="evolution-name" style="font-size: 0.65rem; text-transform: uppercase;">${pokemonName}</div>
             </div>
+        </div>
     `;
 
     if (chain.evolves_to && chain.evolves_to.length > 0) {
@@ -1369,10 +1377,12 @@ function showPokemonDetails(pokemon) {
         else statColor = '#23cd5e';
 
         return `<div class="stat-item">
-            <strong>${statName}:</strong>
-            <div class="stat-value">${statValue}</div>
+            <div class="stat-header">
+                <span class="stat-name">${statName}</span>
+                <span class="stat-value">${statValue}</span>
+            </div>
             <div class="stat-bar-container">
-                <div class="stat-bar" style="width: ${percentage}%; background-color: ${statColor}"></div>
+                <div class="stat-bar" style="width: ${percentage}%; background-color: ${statColor}; color: ${statColor}"></div>
             </div>
         </div>`;
     }).join('');
@@ -1385,17 +1395,21 @@ function showPokemonDetails(pokemon) {
 
     const physicalStats = `
         <div class="stat-item physical-stat">
-            <strong>Altura:</strong>
-            <div class="stat-value">${heightValue} m</div>
+            <div class="stat-header">
+                <span class="stat-name">HT</span>
+                <span class="stat-value">${heightValue}m</span>
+            </div>
             <div class="stat-bar-container">
-                <div class="stat-bar physical-bar" style="width: ${heightPercentage}%; background-color: #3498db"></div>
+                <div class="stat-bar physical-bar" style="width: ${heightPercentage}%; background-color: #333; color: #333"></div>
             </div>
         </div>
         <div class="stat-item physical-stat">
-            <strong>Peso:</strong>
-            <div class="stat-value">${weightValue} kg</div>
+            <div class="stat-header">
+                <span class="stat-name">WT</span>
+                <span class="stat-value">${weightValue}kg</span>
+            </div>
             <div class="stat-bar-container">
-                <div class="stat-bar physical-bar" style="width: ${weightPercentage}%; background-color: #9b59b6"></div>
+                <div class="stat-bar physical-bar" style="width: ${weightPercentage}%; background-color: #333; color: #333"></div>
             </div>
         </div>
     `;
@@ -1404,26 +1418,46 @@ function showPokemonDetails(pokemon) {
     const fallbackSpriteUrl = pokemon.sprites.other['official-artwork'].front_default;
 
     pokemonDetails.innerHTML = `
-        <div class="pokemon-info-screen">
-            <div class="name-container" style="display: flex; align-items: center; justify-content: center; position: relative;">
-                <h2 class="pokemon-name" style="margin: 0; display: inline-block; width: auto;">${pokemon.name}</h2>
-                <button class="sound-btn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; margin-left: 0.5rem;">🔊</button>
+        <div class="pokemon-info-screen" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="name-container" style="display: flex; align-items: baseline; gap: 0.5rem;">
+                <h2 class="pokemon-name" style="margin: 0; text-transform: uppercase;">${pokemon.name}</h2>
+                <span class="pokemon-number" style="opacity: 0.7;">NO. ${pokemon.id.toString().padStart(3, '0')}</span>
+                <button class="sound-btn" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; margin-left: auto;">🔊</button>
             </div>
-            <p class="pokemon-number">#${pokemon.id.toString().padStart(3, '0')}</p>
-            <div class="pokemon-types">${types}</div>
-            <div class="stats-container">
+            
+            <div class="pokemon-types" style="display: flex; gap: 8px;">${types}</div>
+            
+            <div id="pokemonDescription" class="pokemon-description" style="font-size: 0.85rem; font-style: italic; line-height: 1.4; border-left: 3px solid #a8ff85; padding-left: 10px; margin: 0.5rem 0;">
+                Buscando datos en la base de datos...
+            </div>
+
+            <div class="stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem;">
                 ${stats}
                 ${physicalStats}
             </div>
             
-            <div class="evolution-chain-container">
-                <h3>Cadena de Evolución</h3>
-                <div id="evolutionChain" class="evolution-chain">
-                    <div class="loading-evolution">Cargando datos de la cadena de evolución...</div>
+            <div class="evolution-chain-container" style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(168, 255, 133, 0.2);">
+                <h3 style="font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.5rem; opacity: 0.8;">Cadena Evolutiva</h3>
+                <div id="evolutionChain" class="evolution-chain" style="display: flex; gap: 10px; align-items: center; overflow-x: auto;">
+                    <div class="loading-evolution">Cargando...</div>
                 </div>
             </div>
         </div>
     `;
+
+    fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemon.id}/`)
+        .then(res => res.json())
+        .then(speciesData => {
+            const flavorTextEntry = speciesData.flavor_text_entries.find(entry => entry.language.name === 'es') ||
+                speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
+            if (flavorTextEntry) {
+                const descriptionElement = document.getElementById('pokemonDescription');
+                if (descriptionElement) {
+                    descriptionElement.textContent = flavorTextEntry.flavor_text.replace(/\f/g, ' ');
+                }
+            }
+        })
+        .catch(err => console.error("Error fetching flavor text", err));
 
     const spriteImg = document.querySelector('.pokedex-screen .pokemon-sprite');
     spriteImg.src = primarySpriteUrl;
@@ -1434,6 +1468,15 @@ function showPokemonDetails(pokemon) {
 
     modal.style.display = 'block';
     modalContent.classList.add('show');
+
+    const bars = pokemonDetails.querySelectorAll('.stat-bar');
+    bars.forEach(bar => {
+        const targetWidth = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => {
+            bar.style.width = targetWidth;
+        }, 100);
+    });
 
     setupSoundButton(pokemon.id);
 

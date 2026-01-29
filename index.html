@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#dc0a2d">
-    <link rel="icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
 </head>
 
 <body>
@@ -52,7 +53,6 @@
                     <div id="filterPanel" class="filter-panel">
                         <h3>Filtrar por Tipo</h3>
                         <div class="type-filters">
-                            <!-- Type filters will be added dynamically via JavaScript -->
                         </div>
                         <div class="sort-options">
                             <button class="sort-btn" data-sort="id">Ordenar por ID</button>
@@ -87,24 +87,74 @@
         </aside>
         <main class="pokemon-grid">
             <div class="screen-reflection"></div>
-            <!-- Pokemon cards will be dynamically inserted here -->
         </main>
 
         <div id="modal" class="modal">
             <div class="modal-content">
                 <div class="pokedex-left">
                     <div class="pokedex-lights">
-                        <div class="led led-blue"></div>
-                        <div class="led led-red"></div>
-                        <div class="led led-yellow"></div>
+                        <div class="led-blue-large"></div>
+                        <div class="status-leds">
+                            <div class="led-small red"></div>
+                            <div class="led-small yellow"></div>
+                            <div class="led-small green"></div>
+                        </div>
                     </div>
-                    <div class="pokedex-screen">
-                        <img class="pokemon-sprite" src="" alt="">
+                    <div class="pokedex-screen-frame">
+                        <div class="top-leds">
+                            <div class="mini-led"></div>
+                            <div class="mini-led"></div>
+                        </div>
+                        <div class="pokedex-screen">
+                            <img class="pokemon-sprite" src="" alt="">
+                        </div>
+                        <div class="screen-controls">
+                            <div class="round-button red"></div>
+                            <div class="speaker-grill">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pokedex-left-bottom">
+                        <div class="round-button black"></div>
+                        <div class="horizontal-btns">
+                            <div class="rect-btn red"></div>
+                            <div class="rect-btn blue"></div>
+                        </div>
+                        <div class="d-pad">
+                            <div class="d-pad-btn up"></div>
+                            <div class="d-pad-btn right"></div>
+                            <div class="d-pad-btn down"></div>
+                            <div class="d-pad-btn left"></div>
+                            <div class="d-pad-center"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="pokedex-right">
                     <div id="pokemon-details" class="pokemon-details">
-                        <!-- Pokemon info will be inserted here -->
+                    </div>
+                    <div class="pokedex-keypad">
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                    </div>
+                    <div class="pokedex-right-bottom">
+                        <div class="secondary-screens">
+                            <div class="mini-screen white"></div>
+                            <div class="mini-screen white"></div>
+                        </div>
+                        <div class="bottom-controls">
+                            <div class="rect-btn dark"></div>
+                            <div class="rect-btn dark"></div>
+                            <div class="led-yellow"></div>
+                        </div>
                     </div>
                     <audio id="pokemonCry" style="display:none;"></audio>
                 </div>
@@ -113,19 +163,59 @@
         </div>
         <div id="gameModal" class="modal game-modal">
             <div class="modal-content game-content">
+                <div class="pokedex-left">
+                    <div class="pokedex-lights">
+                        <div class="led-blue-large glass-glow"></div>
+                        <div class="status-leds">
+                            <div class="led-small red"></div>
+                            <div class="led-small yellow"></div>
+                            <div class="led-small green"></div>
+                        </div>
+                    </div>
+                    <div class="pokedex-screen-frame">
+                        <div class="pokedex-screen game-display">
+                            <div id="audioPlaceholder" class="audio-placeholder" style="display: none;">🔊</div>
+                            <img id="mysteryPokemon" class="pokemon-sprite silhouette" src="" alt="Who's that Pokemon?">
+                        </div>
+                        <div class="screen-controls">
+                            <div class="round-button red"></div>
+                            <div class="speaker-grill">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pokedex-left-bottom">
+                        <div class="game-score-display">
+                            <span id="gameScore">PUNTUACIÓN: 0</span>
+                        </div>
+                        <div class="d-pad">
+                            <div class="d-pad-btn up"></div>
+                            <div class="d-pad-btn right"></div>
+                            <div class="d-pad-btn down"></div>
+                            <div class="d-pad-btn left"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pokedex-right">
+                    <div class="game-controls-lcd">
+                        <div id="answerOptions" class="answer-options"></div>
+                    </div>
+                    <div class="pokedex-keypad">
+                        <div id="visualModeBtn" class="key mode-btn active">VIS</div>
+                        <div id="audioModeBtn" class="key mode-btn">AUD</div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                        <div class="key"></div>
+                    </div>
+                    <div id="gameResult" class="game-result"></div>
+                    <audio id="pokemonCry" style="display:none;"></audio>
+                </div>
                 <span class="close" onclick="document.getElementById('gameModal').style.display='none'">×</span>
-                <div class="game-controls">
-                    <span class="mode-label">Modo:</span>
-                    <button id="visualModeBtn" class="mode-btn active">Visual</button>
-                    <button id="audioModeBtn" class="mode-btn">Audio</button>
-                </div>
-                <div class="game-screen">
-                    <div id="audioPlaceholder" class="audio-placeholder" style="display: none;">🔊</div>
-                    <img id="mysteryPokemon" class="pokemon-sprite silhouette" src="" alt="Who's that Pokemon?">
-                    <div id="answerOptions" class="answer-options"></div>
-                    <div id="gameScore" class="game-score">Puntuación: 0</div>
-                </div>
-                <div id="gameResult" class="game-result"></div>
             </div>
         </div>
 
@@ -141,7 +231,6 @@
 
                 <div class="game-area">
                     <div class="rosco-container" id="roscoContainer">
-                        <!-- Letters will be generated by JS -->
                     </div>
 
                     <div class="timer-ring-container">
@@ -188,7 +277,6 @@
 
                 <div class="game-area">
                     <div class="rosco-container" id="roscoContainerPokepalabra">
-                        <!-- Letters will be generated by JS -->
                     </div>
                     <div class="timer-ring-container">
                         <svg class="timer-ring__svg" viewBox="0 0 120 120">
