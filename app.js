@@ -1303,6 +1303,14 @@ function capitalizeFirstLetter(string) {
     }).join(' ');
 }
 
+function normalizeName(name) {
+    return name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '');
+}
+
 function showPokemonDetails(pokemon) {
     const modal = document.getElementById('modal');
     const modalContent = modal.querySelector('.modal-content');
@@ -1841,7 +1849,22 @@ function submitPokepalabraWord() {
         return;
     }
 
-    const isValidPokemon = allPokemonData.some(p => p.name.toLowerCase() === input);
+    const normalizedInput = normalizeName(input);
+    const isValidPokemon = allPokemonData.some(p => {
+        const name = p.name;
+        const normalizedName = normalizeName(name);
+
+        if (normalizedName === normalizedInput) return true;
+
+        if (name.includes('-')) {
+            const parts = name.split('-');
+            const baseName = parts[0];
+            if (baseName.length > 2 && normalizeName(baseName) === normalizedInput) {
+                return true;
+            }
+        }
+        return false;
+    });
 
     if (isValidPokemon) {
         pokepalabraState.status[pokepalabraState.currentLetter] = 'correct';
