@@ -22,15 +22,10 @@
                 <span></span>
             </button>
             <h1>Pokédex</h1>
+            <button id="gamesToggle" class="games-toggle" aria-label="Minijuegos" title="Minijuegos">
+                <i class="fa-solid fa-gamepad"></i>
+            </button>
             <nav id="mainNav" class="main-nav">
-                <div class="nav-section minigames-section">
-                    <h3>Minijuegos</h3>
-                    <div class="game-buttons">
-                        <button class="game-btn" id="whosThatPokemon">¿Quién es ese Pokémon?</button>
-                        <button class="game-btn" id="startPokecedario">Pokécedario</button>
-                        <button class="game-btn" id="startPokepalabra">Poképalabra</button>
-                    </div>
-                </div>
                 <div class="gen-filters">
                     <button class="gen-btn active" data-gen="1">Gen 1</button>
                     <button class="gen-btn" data-gen="2">Gen 2</button>
@@ -69,6 +64,27 @@
                 </div>
             </nav>
         </header>
+
+        <aside id="minigameSidebar" class="minigame-sidebar">
+            <div class="sidebar-header">
+                <h3>Minijuegos</h3>
+                <button id="closeSidebar" class="close-sidebar-btn">&times;</button>
+            </div>
+            <div class="sidebar-content">
+                <button class="sidebar-game-btn" id="whosThatPokemon">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>¿Quién es ese Pokémon?</span>
+                </button>
+                <button class="sidebar-game-btn" id="startPokecedario">
+                    <i class="fa-solid fa-a"></i>
+                    <span>Pokécedario</span>
+                </button>
+                <button class="sidebar-game-btn" id="startPokepalabra">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Poképalabra</span>
+                </button>
+            </div>
+        </aside>
         <main class="pokemon-grid">
             <div class="screen-reflection"></div>
             <!-- Pokemon cards will be dynamically inserted here -->
@@ -211,6 +227,7 @@
         <div class="loading-indicator">
             <div class="loading-pokeball"></div>
         </div>
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
         <script src="data/gen1.js"></script>
         <script src="data/gen2.js"></script>
         <script src="data/gen3.js"></script>

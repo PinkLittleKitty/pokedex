@@ -182,9 +182,33 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSortButtons();
     setupSearchInput();
 
-    document.getElementById('whosThatPokemon').addEventListener('click', startWhosThatPokemon);
-    document.getElementById('startPokecedario').addEventListener('click', startPokecedario);
-    document.getElementById('startPokepalabra').addEventListener('click', startPokepalabra);
+    const gamesToggle = document.getElementById('gamesToggle');
+    const minigameSidebar = document.getElementById('minigameSidebar');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+        minigameSidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('active');
+        document.body.classList.toggle('modal-open');
+    }
+
+    if (gamesToggle) gamesToggle.addEventListener('click', toggleSidebar);
+    if (closeSidebar) closeSidebar.addEventListener('click', toggleSidebar);
+    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    document.getElementById('whosThatPokemon').addEventListener('click', () => {
+        startWhosThatPokemon();
+        toggleSidebar();
+    });
+    document.getElementById('startPokecedario').addEventListener('click', () => {
+        startPokecedario();
+        toggleSidebar();
+    });
+    document.getElementById('startPokepalabra').addEventListener('click', () => {
+        startPokepalabra();
+        toggleSidebar();
+    });
 });
 
 function applyFilters() {
