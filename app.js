@@ -210,6 +210,35 @@ document.addEventListener('DOMContentLoaded', () => {
         startPokepalabra();
         toggleSidebar();
     });
+
+    const openLeaderboardSidebarBtn = document.getElementById('openLeaderboardSidebarBtn');
+    if (openLeaderboardSidebarBtn) {
+        openLeaderboardSidebarBtn.addEventListener('click', () => {
+            openLeaderboard('whosThatPokemonVisual');
+            toggleSidebar();
+        });
+    }
+
+    const leaderboardToggle = document.getElementById('leaderboardToggle');
+    if (leaderboardToggle) {
+        leaderboardToggle.addEventListener('click', () => {
+            openLeaderboard('whosThatPokemonVisual');
+        });
+    }
+
+    document.querySelectorAll('.lb-select-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const gameKey = btn.dataset.game;
+            openLeaderboard(gameKey);
+        });
+    });
+
+    const leaderboardModal = document.getElementById('leaderboardModal');
+    window.addEventListener('click', (event) => {
+        if (event.target === leaderboardModal) {
+            leaderboardModal.style.display = 'none';
+        }
+    });
 });
 
 function applyFilters() {
@@ -536,6 +565,144 @@ let currentGameMode = 'visual';
 
 const allPokemonData = [];
 
+const FOSSBOARD_CONFIG = {
+    apiBase: 'https://fossboard.justneki.deno.net',
+    whosThatPokemonVisual: {
+        publicKey: 'pub-d01cfce52bcd7b784f8c',
+        privateKey: 'priv-06faed119406b06f2b8d'
+    },
+    whosThatPokemonAudio: {
+        publicKey: 'pub-acb16b8c72415a11ce6c',
+        privateKey: 'priv-3c1be01502d6d2cab129'
+    },
+    pokecedario: {
+        publicKey: 'pub-4cc440005414b9e799b2',
+        privateKey: 'priv-34df2c94d67d7085ac3f'
+    },
+    pokepalabra: {
+        publicKey: 'pub-867443f39db16592e378',
+        privateKey: 'priv-db6090a90f528c81e33d'
+    }
+};
+
+async function submitScoreToFossboard(gameKey, playerName, score) {
+    const config = FOSSBOARD_CONFIG[gameKey];
+    if (!config) return false;
+
+    try {
+        const url = `${FOSSBOARD_CONFIG.apiBase}/lb/${config.privateKey}/add/${encodeURIComponent(playerName)}/${score}/0/`;
+        const response = await fetch(url);
+        const text = await response.text();
+        return text.trim() === 'OK';
+    } catch (e) {
+        console.error("Fossboard Highscore submission failed:", e);
+        return false;
+    }
+}
+
+async function getScoresFromFossboard(gameKey) {
+    const config = FOSSBOARD_CONFIG[gameKey];
+    if (!config) return [];
+
+    try {
+        const url = `${FOSSBOARD_CONFIG.apiBase}/lb/${config.publicKey}/json`;
+        const response = await fetch(url);
+        if (!response.ok) return [];
+        const data = await response.json();
+
+        const leaderboard = data.dreamlo.leaderboard;
+        if (!leaderboard) return [];
+
+        const entries = leaderboard.entry;
+        if (!entries) return [];
+
+        return Array.isArray(entries) ? entries : [entries];
+    } catch (e) {
+        console.error("Fossboard scores load failed:", e);
+        return [];
+    }
+}
+
+async function openLeaderboard(gameKey = 'whosThatPokemonVisual') {
+    const modal = document.getElementById('leaderboardModal');
+    if (!modal) return;
+
+    modal.style.display = 'block';
+
+    // Set active tab
+    document.querySelectorAll('.lb-select-btn').forEach(btn => {
+        if (btn.dataset.game === gameKey) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    await loadAndRenderLeaderboard(gameKey);
+}
+
+async function loadAndRenderLeaderboard(gameKey) {
+    const tbody = document.getElementById('leaderboardEntries');
+    const loader = document.getElementById('leaderboardLoader');
+    const errorEl = document.getElementById('leaderboardError');
+    const emptyEl = document.getElementById('leaderboardEmpty');
+
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    errorEl.style.display = 'none';
+    emptyEl.style.display = 'none';
+    loader.style.display = 'block';
+
+    try {
+        const rawEntries = await getScoresFromFossboard(gameKey);
+        loader.style.display = 'none';
+
+        if (rawEntries.length === 0) {
+            emptyEl.style.display = 'block';
+            return;
+        }
+
+        const entries = rawEntries.map(e => ({
+            name: e.name,
+            score: parseInt(e.score, 10),
+            date: e.date
+        })).sort((a, b) => b.score - a.score);
+
+        entries.forEach((entry, index) => {
+            const row = document.createElement('tr');
+
+            let rankDisplay = index + 1;
+            if (index === 0) rankDisplay = '<span class="gold-rank">🏆 1</span>';
+            else if (index === 1) rankDisplay = '<span class="silver-rank">🥈 2</span>';
+            else if (index === 2) rankDisplay = '<span class="bronze-rank">🥉 3</span>';
+
+            row.innerHTML = `
+                <td class="col-rank">${rankDisplay}</td>
+                <td class="col-name">${escapeHTML(entry.name)}</td>
+                <td class="col-score glow-score">${entry.score.toLocaleString()}</td>
+                <td class="col-date">${entry.date}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (err) {
+        loader.style.display = 'none';
+        errorEl.style.display = 'block';
+    }
+}
+
+function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g,
+        tag => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        }[tag] || tag)
+    );
+}
+
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? Number(match[2]) : 0;
@@ -668,21 +835,86 @@ function checkAnswer(selected, correct) {
                 <h2>CORRECTO!</h2>
                 <p>¡Es ${correct}!</p>
             </div>`;
+
+        updateScore();
+        setTimeout(() => {
+            showNextPokemon();
+        }, 1000);
     } else {
-        gameScore = 0;
-        gameResult.innerHTML = `
-            <div class="result-popup wrong">
-                <h2>¡INCORRECTO!</h2>
-                <p>¡Es ${correct}!</p>
-                <p>¡Se reinició la puntuación!</p>
-            </div>`;
+        const finalScore = gameScore;
+        updateScore();
+
+        if (finalScore > 0) {
+            gameResult.innerHTML = `
+                <div class="result-popup wrong game-over-popup" style="pointer-events: auto;">
+                    <h2>¡INCORRECTO!</h2>
+                    <p>¡Es ${correct}!</p>
+                    <p class="final-score-text">Racha Final: ${finalScore}</p>
+                    <div class="score-submission-container" style="margin-top: 0.8rem;">
+                        <input type="text" id="whosThatPlayerName" class="trainer-name-input" placeholder="Tu Nombre..." maxlength="15" style="padding: 0.5rem; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0,0,0,0.3); color: white; width: calc(100% - 10px); margin-bottom: 0.5rem; text-align: center; font-family: inherit;">
+                        <button id="submitWhosThatScoreBtn" class="submit-score-btn" style="background: #2ecc71; color: white; padding: 0.5rem; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; transition: all 0.2s;">Registrar Puntuación</button>
+                    </div>
+                    <button id="restartWhosThatBtn" class="restart-btn" style="margin-top: 0.8rem; background: var(--pokedex-red); color: white; padding: 0.5rem; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; font-family: inherit;">Jugar de nuevo</button>
+                </div>`;
+
+            const submitBtn = document.getElementById('submitWhosThatScoreBtn');
+            const restartBtn = document.getElementById('restartWhosThatBtn');
+            const nameInput = document.getElementById('whosThatPlayerName');
+
+            const savedName = localStorage.getItem('leaderboard_username') || '';
+            if (nameInput && savedName) {
+                nameInput.value = savedName;
+            }
+
+            if (submitBtn) {
+                submitBtn.onclick = async () => {
+                    const playerName = nameInput.value.trim();
+                    if (!playerName) {
+                        alert('¡Introduce un nombre!');
+                        return;
+                    }
+                    localStorage.setItem('leaderboard_username', playerName);
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Guardando...';
+
+                    const targetGameKey = currentGameMode === 'audio' ? 'whosThatPokemonAudio' : 'whosThatPokemonVisual';
+                    const success = await submitScoreToFossboard(targetGameKey, playerName, finalScore);
+                    if (success) {
+                        submitBtn.textContent = '¡Guardado!';
+                        submitBtn.style.background = '#27ae60';
+                        setTimeout(() => {
+                            document.getElementById('gameModal').style.display = 'none';
+                            openLeaderboard(targetGameKey);
+                        }, 800);
+                    } else {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Error. Reintentar';
+                        submitBtn.style.background = '#e74c3c';
+                    }
+                };
+            }
+
+            if (restartBtn) {
+                restartBtn.onclick = () => {
+                    gameScore = 0;
+                    updateScore();
+                    showNextPokemon();
+                };
+            }
+        } else {
+            gameResult.innerHTML = `
+                <div class="result-popup wrong">
+                    <h2>¡INCORRECTO!</h2>
+                    <p>¡Es ${correct}!</p>
+                </div>`;
+
+            gameScore = 0;
+            updateScore();
+            setTimeout(() => {
+                showNextPokemon();
+            }, 1000);
+        }
     }
-
-    updateScore();
-
-    setTimeout(() => {
-        showNextPokemon();
-    }, 1000);
 }
 
 function playGameCry(pokemon) {
@@ -2001,6 +2233,53 @@ function endPokecedario() {
 
     document.getElementById('finalCorrect').textContent = correct;
     document.getElementById('finalWrong').textContent = wrong;
+
+    const submitContainer = document.getElementById('pokecedarioSubmitContainer');
+    const submitBtn = document.getElementById('submitPokecedarioScoreBtn');
+    const nameInput = document.getElementById('pokecedarioPlayerName');
+
+    if (submitContainer) {
+        if (correct > 0) {
+            submitContainer.style.display = 'block';
+
+            const savedName = localStorage.getItem('leaderboard_username') || '';
+            if (nameInput) nameInput.value = savedName;
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar Puntuación';
+                submitBtn.style.background = '#2ecc71';
+
+                submitBtn.onclick = async () => {
+                    const playerName = nameInput.value.trim();
+                    if (!playerName) {
+                        alert('¡Introduce un nombre!');
+                        return;
+                    }
+                    localStorage.setItem('leaderboard_username', playerName);
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Guardando...';
+
+                    const success = await submitScoreToFossboard('pokecedario', playerName, correct);
+                    if (success) {
+                        submitBtn.textContent = '¡Guardado!';
+                        submitBtn.style.background = '#27ae60';
+                        setTimeout(() => {
+                            document.getElementById('pokecedarioModal').style.display = 'none';
+                            openLeaderboard('pokecedario');
+                        }, 800);
+                    } else {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Error. Reintentar';
+                        submitBtn.style.background = '#e74c3c';
+                    }
+                };
+            }
+        } else {
+            submitContainer.style.display = 'none';
+        }
+    }
+
     document.getElementById('pokecedarioEndScreen').style.display = 'block';
 }
 
@@ -2209,7 +2488,56 @@ function advancePokepalabraTurn(skipped = false) {
 function endPokepalabra() {
     pokepalabraState.isPlaying = false;
     clearInterval(pokepalabraState.timerInterval);
-    document.getElementById('finalPokepalabraScore').textContent = pokepalabraState.score;
+
+    const finalScore = pokepalabraState.score;
+    document.getElementById('finalPokepalabraScore').textContent = finalScore;
+
+    const submitContainer = document.getElementById('pokepalabraSubmitContainer');
+    const submitBtn = document.getElementById('submitPokepalabraScoreBtn');
+    const nameInput = document.getElementById('pokepalabraPlayerName');
+
+    if (submitContainer) {
+        if (finalScore > 0) {
+            submitContainer.style.display = 'block';
+
+            const savedName = localStorage.getItem('leaderboard_username') || '';
+            if (nameInput) nameInput.value = savedName;
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar Puntuación';
+                submitBtn.style.background = '#2ecc71';
+
+                submitBtn.onclick = async () => {
+                    const playerName = nameInput.value.trim();
+                    if (!playerName) {
+                        alert('¡Introduce un nombre!');
+                        return;
+                    }
+                    localStorage.setItem('leaderboard_username', playerName);
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Guardando...';
+
+                    const success = await submitScoreToFossboard('pokepalabra', playerName, finalScore);
+                    if (success) {
+                        submitBtn.textContent = '¡Guardado!';
+                        submitBtn.style.background = '#27ae60';
+                        setTimeout(() => {
+                            document.getElementById('pokepalabraModal').style.display = 'none';
+                            openLeaderboard('pokepalabra');
+                        }, 800);
+                    } else {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Error. Reintentar';
+                        submitBtn.style.background = '#e74c3c';
+                    }
+                };
+            }
+        } else {
+            submitContainer.style.display = 'none';
+        }
+    }
+
     document.getElementById('pokepalabraEndScreen').style.display = 'block';
 }
 

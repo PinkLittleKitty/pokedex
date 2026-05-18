@@ -3592,3 +3592,248 @@ header {
         font-size: 1rem;
     }
 }
+
+.leaderboard-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+    z-index: 102;
+    position: absolute;
+    top: 1rem;
+    right: 6.5rem;
+}
+
+@media (min-width: 769px) {
+    .leaderboard-toggle {
+        right: 3.5rem;
+        top: 1rem;
+    }
+}
+
+.leaderboard-toggle:hover {
+    transform: scale(1.1);
+    color: #f1c40f;
+}
+
+.leaderboard-content {
+    background: #1e1e1e !important;
+    border: 6px solid #111111 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.05) !important;
+    padding: 1.8rem !important;
+    max-width: 600px !important;
+    height: 80vh !important;
+    height: 80dvh !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    animation: openPokedex 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.leaderboard-content h2 {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-weight: 900 !important;
+    text-shadow: none !important;
+    color: var(--pokedex-red, #dc0a2d) !important;
+}
+
+.lb-select-btn {
+    background: #333 !important;
+    border: 2px solid #000 !important;
+    border-radius: 6px !important;
+    color: #fff !important;
+    padding: 0.4rem 1rem !important;
+    font-size: 0.8rem !important;
+    cursor: pointer !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-weight: bold !important;
+    box-shadow: 0 3px 0 #000 !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+}
+
+.lb-select-btn:hover {
+    background: #444 !important;
+    transform: translateY(1px) !important;
+    box-shadow: 0 2px 0 #000 !important;
+}
+
+.lb-select-btn.active {
+    background: var(--glow-blue, #85c3e9) !important;
+    color: #000 !important;
+    border-color: #000 !important;
+    box-shadow: 0 1px 0 #000 !important;
+    transform: translateY(2px) !important;
+}
+
+.leaderboard-table-container {
+    border: 3px solid #111 !important;
+    background: #232323 !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leaderboard-table th {
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 0.8rem !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    color: #f1c40f !important;
+    background: #111 !important;
+    border-bottom: 3px solid #111 !important;
+    padding: 0.8rem 0.5rem !important;
+}
+
+.leaderboard-table td {
+    padding: 0.75rem 0.5rem !important;
+    border-bottom: 1px solid #2d2d2d !important;
+    color: #f0f0f0 !important;
+    font-size: 0.9rem !important;
+    font-family: 'Courier New', Courier, monospace !important;
+}
+
+.leaderboard-table tr:nth-child(even) td {
+    background: #282828 !important;
+}
+
+.leaderboard-table tr:hover td {
+    background: #333 !important;
+    color: #fff !important;
+}
+
+.col-rank {
+    text-align: center !important;
+    width: 70px !important;
+}
+
+.col-score {
+    text-align: center !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-weight: bold !important;
+    color: #2ecc71 !important;
+    width: 110px !important;
+}
+
+.col-date {
+    text-align: center !important;
+    color: #888 !important;
+    font-size: 0.8rem !important;
+    width: 180px !important;
+}
+
+.gold-rank {
+    background: #dc0a2d !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 0.75rem !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    border: 1px solid #900 !important;
+    display: inline-block !important;
+    text-shadow: none !important;
+}
+
+.silver-rank {
+    background: #3498db !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 0.75rem !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    border: 1px solid #1f5f8f !important;
+    display: inline-block !important;
+    text-shadow: none !important;
+}
+
+.bronze-rank {
+    background: #2ecc71 !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    font-size: 0.75rem !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    border: 1px solid #1e7e43 !important;
+    display: inline-block !important;
+    text-shadow: none !important;
+}
+
+.glow-score {
+    color: #2ecc71 !important;
+    text-shadow: none !important;
+}
+
+.trainer-name-input {
+    background: #fff !important;
+    color: #000 !important;
+    border: 3px solid #111 !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-weight: bold !important;
+    font-size: 1rem !important;
+    padding: 0.6rem !important;
+    width: 100%;
+    text-align: center;
+    box-shadow: none !important;
+    transition: border-color 0.1s ease !important;
+}
+
+.trainer-name-input:focus {
+    outline: none !important;
+    border-color: var(--pokedex-red, #dc0a2d) !important;
+}
+
+.submit-score-btn {
+    background: #2ecc71 !important;
+    color: #fff !important;
+    border: 2px solid #000 !important;
+    border-radius: 4px !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-weight: bold !important;
+    box-shadow: 0 3px 0 #000 !important;
+    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+    cursor: pointer;
+}
+
+.submit-score-btn:hover {
+    background: #27ae60 !important;
+    transform: translateY(1px) !important;
+    box-shadow: 0 2px 0 #000 !important;
+}
+
+.submit-score-btn:active {
+    box-shadow: 0 1px 0 #000 !important;
+    transform: translateY(2px) !important;
+}
+
+.game-over-popup {
+    background: #1b1b1b !important;
+    border: 4px solid var(--pokedex-red, #dc0a2d) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8) !important;
+    color: white !important;
+    padding: 1.5rem !important;
+    border-radius: 8px !important;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace !important;
+}
+
+.game-over-popup h2 {
+    color: var(--pokedex-red, #dc0a2d) !important;
+    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.game-over-popup .final-score-text {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2ecc71;
+    margin: 0.5rem 0;
+    text-shadow: none !important;
+}
